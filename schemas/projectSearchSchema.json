@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://example.com/example.json",
+  "type": "object",
+  "title": "The root schema",
+  "description": "The root schema comprises the entire JSON document.",
+  "default": {},
+  "examples": [
+    {
+      "insured_name": "BobbyJo",
+      "address": "123 fake street",
+      "created_at": "1/19/99"
+    }
+  ],
+  "required": ["insured_name", "address", "created_at"],
+  "properties": {
+    "insured_name": {
+      "$id": "#/properties/insured_name",
+      "type": "string",
+      "title": "The insured_name schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": ["BobbyJo"]
+    },
+    "address": {
+      "$id": "#/properties/address",
+      "type": "string",
+      "title": "The address schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": ["123 fake street"]
+    },
+    "created_at": {
+      "$id": "#/properties/created_at",
+      "type": "string",
+      "title": "The created_at schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": "",
+      "examples": ["1/19/99"]
+    }
+  },
+  "additionalProperties": true
+}
