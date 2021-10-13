@@ -55,7 +55,13 @@ class Employee {
    * throws BadRequestError on duplicates.
    */
 
-  static async register({ username, password, firstInital, lastName, status }) {
+  static async register({
+    username,
+    password,
+    first_inital,
+    last_name,
+    status,
+  }) {
     const duplicateCheck = await db.query(
       `SELECT username
       FROM employees
@@ -78,7 +84,7 @@ class Employee {
         status)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING username, first_inital AS "firstInital", last_name AS "lastName", status`,
-      [username, hashedPassword, firstInital, lastName, status]
+      [username, hashedPassword, first_inital, last_name, status]
     );
 
     const employee = result.rows[0];
@@ -103,7 +109,7 @@ class Employee {
     return result.rows;
   }
 
-  /**Given a username, return data about employee.
+  /**Given an Id, return data about employee.
    *
    * Returns { username, first_inital, last_name, status }
    *
@@ -114,7 +120,7 @@ class Employee {
     const employeeRes = await db.query(
       `SELECT username,
         first_inital AS "firstName",
-        last_nae As "lastName",
+        last_name As "lastName",
         status
       FROM employees
       WHERE username = $1`,
@@ -124,7 +130,7 @@ class Employee {
     const employee = employeeRes.rows[0];
 
     if (!employee) throw new NotFoundError(`No employee: ${username}`);
-    return employeee;
+    return employee;
   }
   /**
    * Update user data with `data`.

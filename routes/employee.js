@@ -11,11 +11,10 @@ const { createToken } = require("../helperFunctions/tokens");
 const employeeNewSchema = require("../schemas/employeeNew.json");
 const employeeUpdateSchema = require("../schemas/employeeUpdate.json");
 const {
-  ensureLoggedIn,
-  authenticateJWT,
   ensureActive,
   ensureAdmin,
   ensureManager,
+  ensureCorrectEmployeeOrManagement,
 } = require("../middleware/auth");
 
 const router = express.Router();
@@ -32,37 +31,45 @@ const router = express.Router();
  * Authorization required: admin
  */
 
-router.post("/", ensureAdmin, async function (req, res, next) {
-  try {
-    const validator = jsonschema.validate(req.body, employeeNewSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
+router.post(
+  "/",
+  ensureCorrectEmployeeOrManagement,
+  async function (req, res, next) {
+    try {
+      const validator = jsonschema.validate(req.body, employeeNewSchema);
+      if (!validator.valid) {
+        const errs = validator.errors.map((e) => e.stack);
+        throw new BadRequestError(errs);
+      }
+
+      const employee = await Employee.register(req.body);
+      const token = createToken(employee);
+      return res.status(201).json({ user, token });
+    } catch (err) {
+      return next(err);
     }
-
-    const employee = await Employee.register(req.body);
-    const token = createToken(employee);
-    return res.status(201).json({ user, token });
-  } catch (err) {
-    return next(err);
   }
-});
+);
 
-/**GET / => { employees: [ {username, firstInital, lastName, status}, ..] }
+/**GET /[username] => { employees}
  *
- * Returns list of all users.
+ * Returns { username, username, firstInital, lastName, status}.
  *
- * Authorization required: manager
+ * Authorization required: manager or admin
  */
 
-router.get("/:username", ensureManager, async function (req, res, next) {
-  try {
-    const employee = await User.get(req.params.username);
-    return res.json({ employee });
-  } catch (err) {
-    return next(err);
+router.get(
+  "/:username",
+  ensureCorrectEmployeeOrManagement,
+  async function (req, res, next) {
+    try {
+      const employee = await Employee.get(req.params.username);
+      return res.json({ employee });
+    } catch (err) {
+      return next(err);
+    }
   }
-});
+);
 
 /** PATCH /[username] { employee } => { employee }
  *

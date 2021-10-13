@@ -6,10 +6,10 @@ const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 const { UnauthorizedError } = require("../expressError");
 
-/** Middleware: Authenticate user
+/** Middleware: Authenticate employee
  *
  * If a token was provided, verify it, and if valid, store the token playload
- * on res.locals (this will include the username and status field)
+ * on res.locals (this will include the id, username and status field)
  *
  * It's not an error if no token was provided or if token is not valid.
  */
@@ -19,7 +19,7 @@ function authenticateJWT(req, res, next) {
     const authHeader = req.header && req.headers.authorization;
     if (authHeader) {
       const token = authHeader.replace(/^[Bb]earer /, "").trim();
-      res.locals.user = jwt.verify(token, SECRET_KEY);
+      res.locals.employee = jwt.verify(token, SECRET_KEY);
     }
     return next();
   } catch (e) {
@@ -34,39 +34,83 @@ function authenticateJWT(req, res, next) {
 
 function ensureLoggedIn(req, res, next) {
   try {
-    if (!res.locals.user) throw new UnauthorizedError();
+    if (!res.locals.employee) throw new UnauthorizedError();
     return next();
   } catch (e) {
     return next(e);
   }
 }
 
-/** Middleware to use when they must have certin access
+/** Middleware to use when employee is active
  *
  * if not raise Unauthorized
  */
 
 function ensureActive(req, res, next) {
-  if (!req.user || !req.user.status !== "employee") {
-    const e = new ExpressError("Unauthorized", 401);
-    return next(e);
-  } else {
+  try {
+    if (
+      !req.locals.employee ||
+      !req.employee.status !== "active" ||
+      !req.employee.status !== "manager" ||
+      !req.employee.status !== "admin"
+    ) {
+      throw new UnauthorizedError();
+    }
     return next();
+  } catch (err) {
+    return next(err);
   }
 }
+
+/**Middleware to use when they need to be logged in as admin user
+ *
+ * if not, raises Unauthorized
+ */
 
 function ensureAdmin(req, res, next) {
-  if (!req.user || req.user.status !== "manager") {
-    return next(new ExpressError("Must be an admin", 401));
+  try {
+    if (!req.user || req.user.status !== "admin") {
+      throw new UnauthorizedError();
+    }
+    return next();
+  } catch (err) {
+    return next(err);
   }
-  return next();
 }
 
+/**Middleware to use when they need to be logged in as manager
+ *
+ * if not, raises Unauthorized
+ */
+
 function ensureManager(req, res, next) {
-  if (!req.user || req.user.status !== "admin") {
-    return next(new ExpressError("Must be a manager", 401));
+  try {
+    if (
+      !req.user ||
+      req.user.status !== "admin" ||
+      req.user.status !== "manager"
+    ) {
+      throw new UnauthorizedError();
+    }
+    return next();
+  } catch (err) {
+    return next(err);
   }
-  return next();
+}
+
+function ensureCorrectEmployeeOrManagement(req, res, next) {
+  try {
+    const user = res.locals.employee;
+    console.log("1", res.locals);
+    if (
+      !(user && (user.ensureManager || user.username === req.params.username))
+    ) {
+      throw new UnauthorizedError();
+    }
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 }
 
 module.exports = {
@@ -75,4 +119,5 @@ module.exports = {
   ensureActive,
   ensureAdmin,
   ensureManager,
+  ensureCorrectEmployeeOrManagement,
 };

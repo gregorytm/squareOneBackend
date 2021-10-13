@@ -7,8 +7,7 @@ CREATE DATABASE squareonedb;
 
 CREATE TABLE employees 
 (
-  id SERIAL PRIMARY KEY,
-  username VARCHAR(25) UNIQUE NOT NULL,
+  username VARCHAR(25) PRIMARY KEY,
   password TEXT NOT NULL,
   first_inital TEXT NOT NULL,
   last_name TEXT NOT NULL,
@@ -28,8 +27,10 @@ CREATE TABLE projects
 
 CREATE TABLE employees_to_projects 
 (
-  emp_id INTEGER NOT NULL REFERENCES employees,
-  proj_id INTEGER NOT NULL REFERENCES projects
+  username VARCHAR(25)
+    REFERENCES employees ON DELETE CASCADE,
+  proj_id INTEGER 
+    REFERENCES projects ON DELETE CASCADE
 );
 
 
@@ -37,7 +38,8 @@ CREATE TABLE chamber
 (
   id SERIAL PRIMARY KEY,
   chamber_name  TEXT NOT NULL,
-  project_id INTEGER NOT NULL REFERENCES projects
+  project_id INTEGER 
+    REFERENCES projects ON DELETE CASCADE
   );
 
 
@@ -52,7 +54,7 @@ CREATE TABLE dehumidifier
 CREATE TABLE affected_material 
 (
   id SERIAL PRIMARY KEY,
-  room_id INTEGER NOT NULL REFERENCES chamber,
+  chamber_id INTEGER NOT NULL REFERENCES chamber,
   material_name TEXT NOT NULL
 );
 
@@ -76,29 +78,34 @@ CREATE TABLE reading
 -- seperate into own file BEFORE deployment
 
 INSERT INTO employees
-  (first_inital, password, last_name, username,  status)
+  (username, password, first_inital,  last_name, status)
 VALUES  
-  ('T', 'TT', 'Mr. T', 'TTT', 'active');
+  ('TTT', '$2b$12$AZH7virni5jlTTiGgEg4zu3lSvAw68qVEfSIOjJ3RqtbJbdW/Oi5q', 'T', 'T', 'active');
+
+INSERT INTO employees
+  (username, password, first_inital, last_name, status)
+VALUES
+  ('MMM', '$2b$12$AZH7virni5jlTTiGgEg4zu3lSvAw68qVEfSIOjJ3RqtbJbdW/Oi5q', 'M', 'M', 'manager');
+
+INSERT INTO employees
+  (username, password, first_inital, last_name, status)
+VALUES
+  ('RRR', '$2b$12$AZH7virni5jlTTiGgEg4zu3lSvAw68qVEfSIOjJ3RqtbJbdW/Oi5q', 'R', 'R', 'admin');
 
 INSERT INTO employees
   (first_inital, last_name, username, password, status)
 VALUES  
   ('A', 'AA', 'Mr. A', 'AAA', 'unactive');
 
-  INSERT INTO employees
-  (first_inital, last_name, username, password, status)
-VALUES  
-  ('B', 'BB', 'Mr. B', 'BBB', 'manager');
-
 INSERT INTO projects
   (insured_name, address, created_at, active)
 VALUES
-  ('Joker bob', '123 fake street', '1999-01-08', true);
+  ('Joker bob', '123 fake street', '1999-01-08', True);
 
 INSERT INTO employees_to_projects
-  (emp_id, proj_id)
+  (username, proj_id)
 VALUES
-  (1, 1);
+  ('TTT', 1);
 
 INSERT INTO chamber
   (chamber_name, project_id)
@@ -116,7 +123,7 @@ VALUES
   (1, 1, 'next to fridge');
 
 INSERT INTO affected_material
-  (room_id, material_name)
+  (chamber_id, material_name)
 VALUES
   (1, 'drywall area 1');
 
