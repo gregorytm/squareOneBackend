@@ -17,7 +17,7 @@ const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
 const projectSearchSchema = require("../schemas/projectSearchSchema.json");
 
-const router = new express.Router();
+const router = new express.Router({ mergeParams: true });
 
 /** POST { project } => { project }
  *
@@ -28,9 +28,9 @@ const router = new express.Router();
  * Authorization required: admin
  */
 
-router.post("/", ensureAdmin, async function (req, res, next) {
+router.post("/", ensureManager, async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.boyd, projectNewSchema);
+    const validator = jsonschema.validate(req.body, projectNewSchema);
     if (!validator.valid) {
       const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
@@ -39,24 +39,47 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     const project = await Project.create(req.body);
     return res.status(201).json({ project });
   } catch (err) {
-    return next(errs);
+    return next(err);
   }
 });
 
-/** GET /=>
- * {projects: [ { id, insuredName, address, createadAt, active }, ...] logoUrl ] }
+/** GET / =>
+ * {projects: [ { id, insuredName, address, createadAt }, ...] }
  *
  * can filter on provided search filters:
+ * - insuredName
  * - address
- * - created_at
- * - active
+ * - createdAt
  *
  * Authorization required: ensureActive
  */
 
-/**Get /[id] => { project }
+router.get("/", async function (req, res, next) {
+  const q = req.query;
+  //arrive as strings from querystring
+  try {
+    const validator = jsonschema.validate(q, projectSearchSchema);
+    if (!validator.valid) {
+      console.log("Hello");
+      const projects = await Project.findActive();
+      console.log("projects", projects);
+      return res.json({ projects });
+      // const errs = valid.errors.map((e) => e.stack);
+      // throw new BadRequestError(errs);
+    }
+
+    const projects = await Project.findActive();
+    return res.json({ projects });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** Get /[projId] => { job }
  *
- * Project is { id, insuredName, address, createAt, active}
+ * Returns { insuredName, address, created_at }
+ *
+ * authorizaon requirda: active statis
  */
 router.get("/:id", ensureActive, async function (req, res, next) {
   try {

@@ -39,6 +39,21 @@ class Project {
    *  Returns [{ id, insured-name, address, created_at active}, ...],
    */
 
+  static async findActive(active = true) {
+    let result = await db.query(
+      `SELECT id, 
+          insured_name, 
+          address, 
+          created_at
+        FROM projects
+        WHERE active = $1`,
+      [active]
+    );
+    console.log("!!!!!!!!---", result.rows[0]);
+    const projects = result.rows[0];
+    return projects;
+  }
+
   static async findAll(searchFilters = {}) {
     let query = `SELECT 
                   address,

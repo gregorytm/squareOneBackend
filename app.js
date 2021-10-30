@@ -23,7 +23,7 @@ app.use(authenticateJWT);
 
 app.use("/auth", authRoutes);
 app.use("/employee", employeeRoutes);
-app.use("/project", projectRoutes);
+app.use("/projects", projectRoutes);
 app.use("/chamber", chamberRoutes);
 app.use("/reading", readingRoutes);
 

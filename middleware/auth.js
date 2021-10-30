@@ -101,7 +101,6 @@ function ensureManager(req, res, next) {
 function ensureCorrectEmployeeOrManagement(req, res, next) {
   try {
     const user = res.locals.employee;
-    console.log("1", res.locals);
     if (
       !(user && (user.ensureManager || user.username === req.params.username))
     ) {
