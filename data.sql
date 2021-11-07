@@ -74,7 +74,7 @@ CREATE TABLE reading
 
 
 
--- sample date
+-- sample data
 -- seperate into own file BEFORE deployment
 
 INSERT INTO employees
@@ -101,6 +101,11 @@ INSERT INTO projects
   (insured_name, address, created_at, active)
 VALUES
   ('Joker bob', '123 fake street', '1999-01-08', True);
+
+INSERT INTO projects
+  (insured_name, address, created_at, active)
+VALUES
+  ('JillyGal', '123 fake street', '1999-01-08', True);
 
 INSERT INTO employees_to_projects
   (username, proj_id)

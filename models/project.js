@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 
 /**  Related functions for projects */
@@ -20,7 +20,7 @@ class Project {
       `INSERT INTO projects
       (insured_name, address, created_at, active)
       VALUES ($1, $2, $3. $4)
-      RETURNING insured_name AS "insuredName", address, created_at AS created_at, active`,
+      RETURNING insured_name AS "insuredName", address, created_at, active`,
       [insuredName, address, created_at, active]
     );
     const project = result.rows[0];
@@ -49,8 +49,8 @@ class Project {
         WHERE active = $1`,
       [active]
     );
-    console.log("!!!!!!!!---", result.rows[0]);
-    const projects = result.rows[0];
+    const projects = result.rows;
+
     return projects;
   }
 
@@ -101,15 +101,16 @@ class Project {
 
   /**Given a project id return data about company
    *
-   * Returns {insured_name, address, created_at, active}
+   * Returns {id, insuredName, address, createdAt, active}
    *
    */
 
   static async get(id) {
     const projectRes = await db.query(
-      `SELECT insured_name AS insuredName,
+      `SELECT id,
+      insured_name,
         address,
-        created_at AS createdAt,
+        created_at,
         active
       FROM projects
       WHERE id = $1`,
@@ -120,7 +121,15 @@ class Project {
 
     if (!project) throw new NotFoundError(`No project found`);
 
-    return project;
+    const transformProject = {
+      id: project.id,
+      insuredName: project.insured_name,
+      address: project.address,
+      createdAt: new Date(project.created_at),
+      active: project.active,
+    };
+
+    return transformProject;
   }
 
   /** Update project data with `data`

@@ -60,9 +60,7 @@ router.get("/", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(q, projectSearchSchema);
     if (!validator.valid) {
-      console.log("Hello");
       const projects = await Project.findActive();
-      console.log("projects", projects);
       return res.json({ projects });
       // const errs = valid.errors.map((e) => e.stack);
       // throw new BadRequestError(errs);
@@ -81,10 +79,10 @@ router.get("/", async function (req, res, next) {
  *
  * authorizaon requirda: active statis
  */
-router.get("/:id", ensureActive, async function (req, res, next) {
+router.get("/:id", async function (req, res, next) {
   try {
-    const project = await Project.get(req.params.handle);
-    return res.json({ company });
+    const project = await Project.get(req.params.id);
+    return res.json({ project });
   } catch (err) {
     return next(err);
   }

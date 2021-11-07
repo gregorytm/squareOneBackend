@@ -11,7 +11,7 @@ const { authenticateJWT } = require("./middleware/auth");
 
 const authRoutes = require("./routes/auth");
 const employeeRoutes = require("./routes/employee");
-const projectRoutes = require("./routes/project");
+const projectRoutes = require("./routes/projects");
 const chamberRoutes = require("./routes/chamber");
 const readingRoutes = require("./routes/reading");
 

@@ -4,8 +4,6 @@ const db = require("../db");
 const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 const { NotFoundError } = require("../expressError");
 
-const { BCRYPT_WORK_FACTOR } = require("../config.js");
-
 /** Related functions for chambers */
 
 class Chamber {
@@ -17,10 +15,10 @@ class Chamber {
    */
 
   static async create(data) {
-    const result = await db.queryu(
+    const result = await db.query(
       `INSERT INTO chamber (chamber_name, project_id)
     VALUES ($1, $2)
-    RETURNING id, chamber_name AS "chamberName" project_id AS "projectId`,
+    RETURNING id, chamber_name project_id`,
       [data.chamberName, data.projectId]
     );
     let chamber = result.rows[0];
@@ -35,11 +33,11 @@ class Chamber {
    * -Returns [{ chamberName }]
    */
 
-  static async findAll({ projectId }) {
-    let query = `SELECT chamberName, address
+  static async findAll(projectId) {
+    let query = `SELECT chamber_name, address
       FROM chamber
       JOIN projects
-      ON chamber.project_id = project.id`;
+      ON chamber.project_id = projects.id`;
     return result.rows;
   }
 
