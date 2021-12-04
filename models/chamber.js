@@ -28,84 +28,57 @@ class Chamber {
 
   /** Find all chambers for a given project
    *
-   * chamber format (chamberName, project_id)
+   * chamber format (chamberName, projectId)
    *
-   * -Returns [{ chamberName }]
+   * -Returns [ transformArray ]
    */
 
-  static async findAll(projectId) {
-    let query = `SELECT chamber_name, address
+  static async findRelated(projectId) {
+    let query = await db.query(`SELECT chamber.id, chamber_name, project_id
       FROM chamber
       JOIN projects
-      ON chamber.project_id = projects.id`;
-    return result.rows;
+      ON chamber.project_id = projects.id`);
+    const allChambers = query.rows;
+
+    const transformArray = [];
+
+    allChambers.map(function (el) {
+      const transformChamber = {
+        id: el.id,
+        chamberName: el.chamber_name,
+        projectId: el.project_id,
+      };
+      transformArray.push(transformChamber);
+    });
+
+    return transformArray;
   }
 
-  /** Given a chamber id, return data about job
+  /** Given a chamber id, return data about chamber
    *
-   * Returns {id, chamberName, projectName}
-   *  where readings [{ id chamberId, temp, RH,
-   *  moistureContent, readingDate, dayNumber}, ...]
+   *
+   *
+   * Returns {id, chamberName, projectId}
    *
    */
 
   static async get(id) {
-    // const chamberRes = await db.query(
-    //   `SELECT id,
-    //     chamber_name AS "chamberName",
-    //     project_id AS "projectId"
-    //   FROM chamber
-    //   WHERE id = $1`, [id]
-    // );
-
-    // const chamber = chamberRes.rows[0];
-
-    // if(!chamber) throw new NotFoundError(`No chamber: ${id}`);
-
-    // const readingsRes = await db.query(
-    //   `SELECT chamber_id AS "chamberId",
-    //     temp,
-    //     RH,
-    //     reading_date AS "readingDate"
-    //   FROM reading
-    //   WHERE id= $1`, [chamber.id]
-    // );
-    // chamber.readings = readingsRes.rows;
-
-    // const dehuRes = await db.query(
-    //   `SELECT id,
-    //     dehu_number AS "dehuNumber",
-    //     chamber_id AS "chamberId",
-    //     location
-    //   FROM dehumidifier
-    //   WHERE id= $1`, [chamber.id]
-    // )
-    // chamber.dehus = dehuRes.rows;
-
-    // const materialRes = await db.query(
-    //   `SELECT id,
-    //     room_id AS roomId,
-    //     material_name AS materialName
-    //   FROM affected_material
-    //   WHERE id=$1`, [chamber.id]
-    // )
-    // chamber.materials = materialRes.rows;
-
-    const projectRes = await db.query(
+    const chamberRes = await db.query(
       `SELECT id,
-        insured_name AS "insuredName",
-        address,
-        created_at AS "createdAt",
-        active
-      FROM projects
-      WHERE id= $1`,
-      [chamber.projectId]
+        chamber_name,
+        project_id
+      FROM chamber
+      WHERE project_id= $1`,
+      [id]
     );
+    const chambers = chamberRes.rows;
 
-    delete chamber.projectId;
-    chamber.project = projectRes.rows[0];
-
-    return chamber;
+    const transformChambers = chambers.map((chamber) => ({
+      id: chamber.id,
+      chamberName: chamber.chamber_name,
+      projectId: chamber.project_id,
+    }));
+    return transformChambers;
   }
 
   /** Update chamber name

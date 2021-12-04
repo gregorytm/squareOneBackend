@@ -1,5 +1,13 @@
+"use strict";
+
+/** Routes for dehus  */
 const express = require("express");
-const router = new express.Router();
+const { BadRequrestError } = require("../expressError");
+const { ensureActive, ensureManager } = require("../middleware/auth");
+const Dehu = require("../models/dehu.js");
+const router = express.Router({ mergeParams: true });
+
+//to be removeed later
 const ExpressError = require("../expressError");
 const db = require("../db");
 
@@ -17,6 +25,23 @@ router.post("/new", async (req, res, next) => {
     return res.json(results.rows[0]);
   } catch (e) {
     return next(e);
+  }
+});
+
+/**Get =>
+ * {dehu: [{id, dehuNumber, chamberId, location},...] }
+ *
+ * all dehu's for a given chamber
+ *
+ * Authorization required: active
+ */
+
+router.get("/", async function (req, res, next) {
+  try {
+    const dehus = await Dehu.findRelated(req.params);
+    return res.json({ dehus });
+  } catch (err) {
+    return next(err);
   }
 });
 

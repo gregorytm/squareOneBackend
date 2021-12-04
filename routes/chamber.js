@@ -39,23 +39,34 @@ router.post("/", ensureActive, async function (req, res, next) {
 });
 
 /**GET / =>
- * {chamber: [{id, chamberName, projectId }, ...] }
+ * {chambers: [{id, chamberName, projectId }, ...] }
  *
- * all chamber for given project
+ * all chambers for given project
  *
  * Authorization required: active
  */
 
 router.get("/", async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.body, chamberSearchSchema);
-    if (!validator.valid) {
-      const errs = validator.erros.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    const chambers = await Chamber.findAll(req.body);
+    const chambers = await Chamber.findRelated(req.params);
     return res.json({ chambers });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**Get /[chamberId] => { chamber}
+ *
+ * Returns {id ChamberName, projectId}
+ * Where chamber is { projId }
+ *
+ * Authorization required: none
+ */
+
+router.get("/:id", async function (req, res, next) {
+  try {
+    const chamber = await Chamber.get(req.params.id);
+    return res.json({ chamber });
   } catch (err) {
     return next(err);
   }
@@ -68,7 +79,7 @@ router.get("/", async function (req, res, next) {
  * RETURNS { id, chamberName, projectId }
  */
 
-router.patch("./:id", ensureManager, async function (req, res, next) {
+router.patch("/:id", ensureManager, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, chamberUpdateSchema);
     if (!validator.valid) {

@@ -12,6 +12,9 @@ const {
   ensureAdmin,
 } = require("../middleware/auth");
 const Project = require("../models/project");
+const Chamber = require("../models/chamber");
+const Dehu = require("../models/dehu");
+const Materials = require("../models/materials");
 
 const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
@@ -73,20 +76,52 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-/** Get /[projId] => { job }
+/** Get /[projId] => { project }
  *
  * Returns { insuredName, address, created_at }
  *
- * authorizaon requirda: active statis
+ * authorization requird: active statis
  */
-router.get("/:id", async function (req, res, next) {
+router.get("/:projId", async function (req, res, next) {
   try {
-    const project = await Project.get(req.params.id);
+    const project = await Project.get(req.params.projId);
     return res.json({ project });
   } catch (err) {
     return next(err);
   }
 });
+
+router.get("/:projId/chambers", async function (req, res, next) {
+  try {
+    const chambers = await Chamber.get(req.params.projId);
+    return res.json({ chambers });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get("/:projId/chamber/:chamberId", async function (req, res, next) {
+  console.log("test");
+  try {
+    const dehu = await Dehu.findRelated(req.params.chamberId);
+    console.log("dehus", dehu);
+    return res.json({ dehu });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+router.get(
+  "/:projId/chamber/:chamberId/material",
+  async function (req, res, next) {
+    try {
+      const material = await Materials.findRelated(req.params.chamberId);
+      return res.json({ material });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** Patch /[id] { fld1, fld2, ...} => { project}
  *

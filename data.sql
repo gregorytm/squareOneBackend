@@ -122,6 +122,9 @@ INSERT INTO chamber
 VALUES
 ( 'uneffected', 1);
 
+INSERT INTO chamber(chamber_name, project_id)
+VALUES( 'uneffected', 2);
+
 INSERT INTO dehumidifier
   (dehu_number, chamber_id, location)
 VALUES

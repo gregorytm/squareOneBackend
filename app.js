@@ -13,6 +13,8 @@ const authRoutes = require("./routes/auth");
 const employeeRoutes = require("./routes/employee");
 const projectRoutes = require("./routes/projects");
 const chamberRoutes = require("./routes/chamber");
+const dehuRoutes = require("./routes/dehumidifier");
+const materialRoutes = require("./routes/material");
 const readingRoutes = require("./routes/reading");
 
 const app = express();
@@ -25,6 +27,8 @@ app.use("/auth", authRoutes);
 app.use("/employee", employeeRoutes);
 app.use("/projects", projectRoutes);
 app.use("/chamber", chamberRoutes);
+app.use("/dehu", dehuRoutes);
+app.use("/material", materialRoutes);
 app.use("/reading", readingRoutes);
 
 //404 error handler == matches everything

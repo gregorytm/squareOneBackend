@@ -99,7 +99,7 @@ class Project {
     return projectRes.rows;
   }
 
-  /**Given a project id return data about company
+  /**Given a project id return data about project
    *
    * Returns {id, insuredName, address, createdAt, active}
    *
@@ -128,7 +128,6 @@ class Project {
       createdAt: new Date(project.created_at),
       active: project.active,
     };
-
     return transformProject;
   }
 
