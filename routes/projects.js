@@ -6,15 +6,12 @@ const jsonschema = require("jsonschema");
 const express = require("express");
 
 const { BadRequestError } = require("../expressError");
-const {
-  ensureActive,
-  ensureManager,
-  ensureAdmin,
-} = require("../middleware/auth");
+const { ensureUser, ensureManager } = require("../middleware/auth");
 const Project = require("../models/project");
 const Chamber = require("../models/chamber");
 const Dehu = require("../models/dehu");
-const Materials = require("../models/materials");
+const Material = require("../models/material");
+const Reading = require("../models/reading");
 
 const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
@@ -31,33 +28,16 @@ const router = new express.Router({ mergeParams: true });
  * Authorization required: admin
  */
 
-router.post("/", ensureManager, async function (req, res, next) {
+router.post("/new", ensureManager, async function (req, res, next) {
   try {
-    const validator = jsonschema.validate(req.body, projectNewSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
     const project = await Project.create(req.body);
-    return res.status(201).json({ project });
+    return res.status(201).json(project);
   } catch (err) {
     return next(err);
   }
 });
 
-/** GET / =>
- * {projects: [ { id, insuredName, address, createadAt }, ...] }
- *
- * can filter on provided search filters:
- * - insuredName
- * - address
- * - createdAt
- *
- * Authorization required: ensureActive
- */
-
-router.get("/", async function (req, res, next) {
+router.get("/", ensureUser, async function (req, res, next) {
   const q = req.query;
   //arrive as strings from querystring
   try {
@@ -82,7 +62,7 @@ router.get("/", async function (req, res, next) {
  *
  * authorization requird: active statis
  */
-router.get("/:projId", async function (req, res, next) {
+router.get("/:projId", ensureUser, async function (req, res, next) {
   try {
     const project = await Project.get(req.params.projId);
     return res.json({ project });
@@ -91,32 +71,118 @@ router.get("/:projId", async function (req, res, next) {
   }
 });
 
-router.get("/:projId/chambers", async function (req, res, next) {
+router.get("/:projId/chambers", ensureUser, async function (req, res, next) {
   try {
-    const chambers = await Chamber.get(req.params.projId);
+    const chambers = await Chamber.findRelated(req.params.projId);
     return res.json({ chambers });
   } catch (err) {
     return next(err);
   }
 });
 
-router.get("/:projId/chamber/:chamberId", async function (req, res, next) {
-  console.log("test");
-  try {
-    const dehu = await Dehu.findRelated(req.params.chamberId);
-    console.log("dehus", dehu);
-    return res.json({ dehu });
-  } catch (err) {
-    return next(err);
+//TODO: determain auth required
+router.post(
+  "/:projId/chamber/new",
+  ensureUser,
+  async function (req, res, next) {
+    try {
+      const chamber = await Chamber.create(req.body, req.query);
+      return res.status(201).json({ chamber });
+    } catch (err) {
+      return next(err);
+    }
   }
-});
+);
+
+router.get(
+  "/:projId/chamber/:chamberId",
+  ensureUser,
+  async function (req, res, next) {
+    try {
+      const chamber = await Chamber.get(req.params.chamberId);
+      return res.json({ chamber });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.post(
+  "/projId/chamber/:chamberId/dehu/new",
+  ensureUser,
+  async function (req, res, next) {
+    try {
+      const dehu = await Dehu.create(req.body);
+      return res.status(201).json(dehu);
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 router.get(
   "/:projId/chamber/:chamberId/material",
+  ensureUser,
   async function (req, res, next) {
     try {
-      const material = await Materials.findRelated(req.params.chamberId);
+      const material = await Material.findRelated(req.params.chamberId);
       return res.json({ material });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.get(
+  "/:projId/chamber/:chamberId/material/:materialId",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const material = await Reading.findMaterialReadings(
+        req.params.materialId
+      );
+      return res.json({ material });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.get(
+  "/:projId/chamber/:chamberId/dehu/:dehuId",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const dehuReadings = Reading.findDehuReadings(req.params.dehuId);
+      return res.json({ dehuReadings });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.get(
+  "/:projId/chamber/:chamberId/readings",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const chamberReadings = await Reading.findChamberReadings(
+        req.params.chamberId
+      );
+      return res.json({ chamberReadings });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+router.post(
+  "/:projId/chamber/:chamberId/reading",
+  ensureUser,
+  async function (req, res, next) {
+    try {
+      const reading = await Reading.create(req.body);
+      return res.status(201).json({ reading });
     } catch (err) {
       return next(err);
     }
@@ -131,12 +197,13 @@ router.get(
  *
  * Feturns { insuredName, address, createdAt, active }
  *
- * Authorization required: ensureActive
+ * Authorization required: ensureUser
  */
 
+//TODO: impliment patching of projects & readings
 router.patch("/:id");
 
-router.get("/", async function (req, res, next) {
+router.get("/", ensureUser, async function (req, res, next) {
   const q = req.query;
   //arrive as strings from querystring, but we want as ints
 
@@ -159,10 +226,65 @@ router.get("/", async function (req, res, next) {
  * Authorization: admin
  */
 
-router.delete("/:id", ensureAdmin, async function (req, res, next) {
+router.delete("/:id", async function (req, res, next) {
   try {
     await Project.remove(req.params.id);
-    return res.json({ deleted: req.params.handle });
+    return res.json({ deleted: req.params.id });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** GENERATE REPORTS related to each project( chamber, dehu, affectedMaterial) */
+
+/** GET/=>
+ * {chambers: [{id, chamberName, projectId }, ...]}
+ * {chamberReading: [{id, chamber_id, temp, RH, mosistureContent, readingDate, dayNumber}]}
+ *
+ * Authorization require: active
+ */
+
+router.get("/:projectId/readings/chamber", async function (req, res, next) {
+  try {
+    const chambers = await Chamber.getReports(req.params.projectId);
+    return res.json({ chambers });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** GENERATE REPORTS related to dehus */
+
+/** GET/=>
+ * {dehus: [{dehuId, dehuNumber, temp, RH, readingDate, dayNumber }, ...]}
+ * {dehuReading: [{ dehuId, temp, RH, readingDate, dayNumber}]}
+ *
+ * Authorization require: manager
+ */
+
+router.get("/:projectId/readings/dehu", async function (req, res, next) {
+  try {
+    const dehus = await Dehu.getReports(req.params.projectId);
+    return res.json({ dehus });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** GENERATE REPORTS related to materials */
+
+/** GET/=>
+ * {materials: [{materialId, materialName, moistureContent, readingDate, dayNumber }, ...]}
+ * {dehuReading: [{ materialName, moistureConetent, readingDate, dayNumber}]}
+ *
+ * Authorization require: manager
+ */
+
+router.get("/:projectId/readings/materials", async function (req, res, next) {
+  try {
+    const materials = await Material.getReports(req.params.projectId);
+    console.log("test", materials);
+    return res.json({ materials });
   } catch (err) {
     return next(err);
   }

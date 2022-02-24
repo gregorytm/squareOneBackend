@@ -7,13 +7,11 @@ const cors = require("cors");
 
 const { NotFoundError } = require("./expressError");
 
-const { authenticateJWT } = require("./middleware/auth");
-
 const authRoutes = require("./routes/auth");
 const employeeRoutes = require("./routes/employee");
 const projectRoutes = require("./routes/projects");
 const chamberRoutes = require("./routes/chamber");
-const dehuRoutes = require("./routes/dehumidifier");
+const dehuRoutes = require("./routes/dehu");
 const materialRoutes = require("./routes/material");
 const readingRoutes = require("./routes/reading");
 
@@ -21,7 +19,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(authenticateJWT);
 
 app.use("/auth", authRoutes);
 app.use("/employee", employeeRoutes);

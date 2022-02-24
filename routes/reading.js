@@ -3,10 +3,15 @@ const router = new express.Router();
 const ExpressError = require("../expressError");
 const db = require("../db");
 const { isDefinedNumber } = require("../helperFunctions/isDefinedNumber");
+const {
+  ensureUser,
+  ensureManager,
+  ensureAdmin,
+} = require("../middleware/auth");
 
 // new reading
 
-router.post("/new", async (req, res, next) => {
+router.post("/new", ensureUser, async (req, res, next) => {
   try {
     const {
       chamber_id,
@@ -27,7 +32,10 @@ router.post("/new", async (req, res, next) => {
       throw new ExpressError("all readings data required", 400);
     }
     const results = await db.query(
-      `INSERT INTO reading (chamber_id, dehu_id, material_id, temp, RH, moisture_content, reading_date, day_number) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING temp, RH, moisture_content`,
+      `INSERT INTO reading (chamber_id, dehu_id, material_id, temp, RH, 
+        moisture_content, reading_date, day_number) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+      RETURNING temp, RH, moisture_content`,
       [
         chamber_id,
         dehu_id,
@@ -46,7 +54,7 @@ router.post("/new", async (req, res, next) => {
 });
 
 //update reading
-router.patch("/:id", async (req, res, next) => {
+router.patch("/:id", ensureManager, async (req, res, next) => {
   try {
     const { id } = req.params;
     const {
@@ -78,8 +86,8 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
-//delete proj
-router.delete("/id", async (req, res, next) => {
+//delete reading
+router.delete("/id", ensureManager, async (req, res, next) => {
   const { id } = req.params;
   try {
     const results = db.query("DELETE FROM reading WHERE id=$1", [
@@ -87,7 +95,7 @@ router.delete("/id", async (req, res, next) => {
     ]);
     return (res.send = { msg: "DELETED!" });
   } catch (e) {
-    return nexgt(e);
+    return next(e);
   }
 });
 

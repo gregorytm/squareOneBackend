@@ -54,7 +54,7 @@ router.post("/register", async function (req, res, next) {
     }
     const newEmployee = await Employee.register({
       ...req.body,
-      status: "unactive",
+      role: null,
     });
     const token = createToken(newEmployee);
     return res.status(201).json({ token });

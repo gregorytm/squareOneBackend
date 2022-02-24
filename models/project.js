@@ -15,13 +15,17 @@ class Project {
    *
    */
 
-  static async create({ insuredName, address, created_at, active }) {
+  static async create({
+    insured_name: insuredName,
+    address,
+    created_at: createdAt,
+  }) {
     const result = await db.query(
       `INSERT INTO projects
       (insured_name, address, created_at, active)
-      VALUES ($1, $2, $3. $4)
-      RETURNING insured_name AS "insuredName", address, created_at, active`,
-      [insuredName, address, created_at, active]
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, insured_name, address, created_at, active`,
+      [insuredName, address, createdAt, true]
     );
     const project = result.rows[0];
 
@@ -175,11 +179,11 @@ class Project {
       FROM projects
       WHERE id = $1
       Returning id`,
-      [handle]
+      [id]
     );
     const project = result.rows[0];
 
-    if (!project) throw new NotFoundError(`No company found`);
+    if (!project) throw new NotFoundError(`No project found`);
   }
 }
 

@@ -16,7 +16,7 @@ const { BCRYPT_WORK_FACTOR } = require("../config.js");
 class Employee {
   /** authenticate employee with username, password
    *
-   * Returns { username first_inital, last_name, status
+   * Returns { username first_inital, last_name, role
    *
    * Throws UnauthorizedError if user not found or wrong password.
    */
@@ -24,21 +24,24 @@ class Employee {
   static async authenticate(username, password) {
     // try to find the user first
     const result = await db.query(
-      `SELECT Username,
+      `SELECT id,
+              username,
               password,
               first_inital AS "firstInital",
               last_name AS "lastName",
-              status
+              role
       FROM employees
       WHERE username = $1`,
       [username]
     );
 
     const employee = result.rows[0];
+    console.assert(!!employee, `no user with username "${username}"found`);
 
     if (employee) {
       //compare hashed password to a new has from password
       const isValid = await bcrypt.compare(password, employee.password);
+      console.assert(isValid, "invalid password supplied");
       if (isValid === true) {
         delete employee.password;
         return employee;
@@ -50,18 +53,12 @@ class Employee {
 
   /** Register user with data.
    *
-   * Returns { username, firstInital, lastName, status }
+   * Returns { username, firstInital, lastName, role }
    *
    * throws BadRequestError on duplicates.
    */
 
-  static async register({
-    username,
-    password,
-    first_inital,
-    last_name,
-    status,
-  }) {
+  static async register({ username, password, first_inital, last_name, role }) {
     const duplicateCheck = await db.query(
       `SELECT username
       FROM employees
@@ -81,10 +78,10 @@ class Employee {
         password,
         first_inital,
         last_name,
-        status)
+        role)
         VALUES ($1, $2, $3, $4, $5)
-        RETURNING username, first_inital AS "firstInital", last_name AS "lastName", status`,
-      [username, hashedPassword, first_inital, last_name, status]
+        RETURNING username, first_inital AS "firstInital", last_name AS "lastName", role`,
+      [username, hashedPassword, first_inital, last_name, role]
     );
 
     const employee = result.rows[0];
@@ -94,42 +91,72 @@ class Employee {
 
   /**Find all users
    *
-   * Returns [{ username, first_inital, last_name, status }, ...]
+   * Returns [{ username, first_inital, last_name, role }, ...]
    */
 
-  static async findAll() {
+  static async getAll() {
+    console.log("models test1");
     const result = await db.query(
-      `SELECT username,
+      `SELECT id,
         first_inital AS "firstInital",
         last_name AS "lastName",
-        status
-      FROM employees
-      ORDER BY username`
+        role
+      FROM employees`
     );
     return result.rows;
   }
 
   /**Given an Id, return data about employee.
    *
-   * Returns { username, first_inital, last_name, status }
+   * Returns { username, first_inital, last_name, role }
    *
    * Throws NotFoundError if user not found
    */
 
-  static async get(username) {
+  static async get(id) {
     const employeeRes = await db.query(
-      `SELECT username,
+      `SELECT id,
+        username,
         first_inital AS "firstName",
         last_name As "lastName",
-        status
+        role
       FROM employees
-      WHERE username = $1`,
-      [username]
+      WHERE employees.id = $1`,
+      [id]
     );
 
     const employee = employeeRes.rows[0];
 
-    if (!employee) throw new NotFoundError(`No employee: ${username}`);
+    if (!employee) throw new NotFoundError(`No employee found`);
+    return employee;
+  }
+
+  /**Given an Id, update role status to go from user to manager */
+  static async promoteToManager(empId) {
+    const querySql = await db.query(
+      `UPDATE employees
+    SET role = 'manager' 
+    WHERE id = $1
+    RETURNING last_name, role`,
+      [empId]
+    );
+    const employee = querySql.rows;
+
+    if (!employee) throw new NotFoundError(`No employee found`);
+    return employee;
+  }
+
+  static async promoteToUser(empId) {
+    const querySql = await db.query(
+      `UPDATE employees
+    SET role = 'user' 
+    WHERE id = $1
+    RETURNING last_name, role`,
+      [empId]
+    );
+    const employee = querySql.rows;
+
+    if (!employee) throw new NotFoundError(`No employee found`);
     return employee;
   }
   /**
@@ -139,9 +166,9 @@ class Employee {
    * for update
    *
    * Data can include:
-   *  { username, firstInital, lastName, password status }
+   *  { username, firstInital, lastName, password role }
    *
-   * Returns { username, firstName, lastName, status }
+   * Returns { username, firstName, lastName, role }
    *
    * Throws NotFoundError if not found.
    *
@@ -158,7 +185,7 @@ class Employee {
     const { setCols, values } = sqlForPartialUpdate(data, {
       firstInital: "first_inital",
       lastName: "last_name",
-      status: "status",
+      role: "role",
     });
     const usernameVarIdx = "$" + (values.length + 1);
 
@@ -168,7 +195,7 @@ class Employee {
                     Returning username,
                               first_inital As "firstInital",
                               last_name AS "lastName:,
-                              status`;
+                              role`;
     const result = await db.query(querySql, [...values, username]);
     const employee = result.rows[0];
 
@@ -180,16 +207,17 @@ class Employee {
 
   /** Delete given user from database; returns undefined */
 
-  static async remove(username) {
+  static async remove(empId) {
     let result = await db.query(
       `DELETE
       FROM employees
-      WHERE username = $1
-      RETURNING username,`[username]
+      WHERE id = $1
+      RETURNING username`,
+      [empId]
     );
     const employee = result.rows[0];
 
-    if (!employee) throw new NotFoundError(`No user: ${username}`);
+    if (!employee) throw new NotFoundError(`No user found`);
   }
 }
 

@@ -1,4 +1,4 @@
-const { Client } = require("pg");
+const { Client } = require("pg/lib");
 const { DB_URI } = require("./config");
 
 const client = new Client({

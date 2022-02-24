@@ -5,39 +5,38 @@
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 const { UnauthorizedError } = require("../expressError");
+const Employee = require("../models/employee");
 
 /** Middleware: Authenticate employee
  *
  * If a token was provided, verify it, and if valid, store the token playload
- * on res.locals (this will include the id, username and status field)
+ * on res.locals (this will include the id, username and role field)
  *
  * It's not an error if no token was provided or if token is not valid.
  */
 
-function authenticateJWT(req, res, next) {
-  try {
-    const authHeader = req.header && req.headers.authorization;
-    if (authHeader) {
-      const token = authHeader.replace(/^[Bb]earer /, "").trim();
-      res.locals.employee = jwt.verify(token, SECRET_KEY);
-    }
-    return next();
-  } catch (e) {
-    return next();
+async function getEmployeeForToken(req) {
+  const authHeader = req.header && req.headers.authorization;
+  if (!authHeader) {
+    console.log("auth header not supplied");
+    return;
   }
-}
 
-/**Middlware to use when they must be logged in
- *
- * If not, raise Unauthroized
- */
-
-function ensureLoggedIn(req, res, next) {
+  const token = authHeader.replace(/^[Bb]earer /, "").trim();
+  const parsedToken = jwt.verify(token, SECRET_KEY);
+  if (
+    typeof parsedToken !== "object" ||
+    parsedToken === null ||
+    typeof parsedToken.userId !== "number"
+  ) {
+    console.log("token payload invalid", parsedToken);
+    return;
+  }
   try {
-    if (!res.locals.employee) throw new UnauthorizedError();
-    return next();
+    return await Employee.get(parsedToken.userId);
   } catch (e) {
-    return next(e);
+    console.log("failure reading employee", e);
+    return;
   }
 }
 
@@ -46,33 +45,17 @@ function ensureLoggedIn(req, res, next) {
  * if not raise Unauthorized
  */
 
-function ensureActive(req, res, next) {
+async function ensureUser(req, res, next) {
   try {
-    if (
-      !req.locals.employee ||
-      !req.employee.status !== "active" ||
-      !req.employee.status !== "manager" ||
-      !req.employee.status !== "admin"
-    ) {
-      throw new UnauthorizedError();
+    const employee = await getEmployeeForToken(req);
+    if (employee) {
+      const role = employee.role;
+      if (role === "user" || role === "manager" || role === "admin") {
+        return next();
+      }
     }
-    return next();
-  } catch (err) {
-    return next(err);
-  }
-}
 
-/**Middleware to use when they need to be logged in as admin user
- *
- * if not, raises Unauthorized
- */
-
-function ensureAdmin(req, res, next) {
-  try {
-    if (!req.user || req.user.status !== "admin") {
-      throw new UnauthorizedError();
-    }
-    return next();
+    throw new UnauthorizedError();
   } catch (err) {
     return next(err);
   }
@@ -83,40 +66,45 @@ function ensureAdmin(req, res, next) {
  * if not, raises Unauthorized
  */
 
-function ensureManager(req, res, next) {
+async function ensureManager(req, res, next) {
   try {
-    if (
-      !req.user ||
-      req.user.status !== "admin" ||
-      req.user.status !== "manager"
-    ) {
-      throw new UnauthorizedError();
+    const employee = await getEmployeeForToken(req);
+    if (employee) {
+      const role = employee.role;
+      if (role === "manager" || role === "admin") {
+        return next();
+      }
     }
-    return next();
+
+    throw new UnauthorizedError();
   } catch (err) {
     return next(err);
   }
 }
 
-function ensureCorrectEmployeeOrManagement(req, res, next) {
+/**Middleware to use when they need to be logged in as admin user
+ *
+ * if not, raises Unauthorized
+ */
+
+async function ensureAdmin(req, res, next) {
   try {
-    const user = res.locals.employee;
-    if (
-      !(user && (user.ensureManager || user.username === req.params.username))
-    ) {
-      throw new UnauthorizedError();
+    const employee = await getEmployeeForToken(req);
+    if (employee) {
+      const role = employee.role;
+      if (role === "admin") {
+        return next();
+      }
     }
-    return next();
+
+    throw new UnauthorizedError();
   } catch (err) {
     return next(err);
   }
 }
 
 module.exports = {
-  authenticateJWT,
-  ensureLoggedIn,
-  ensureActive,
+  ensureUser,
   ensureAdmin,
   ensureManager,
-  ensureCorrectEmployeeOrManagement,
 };

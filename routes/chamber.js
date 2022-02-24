@@ -6,7 +6,7 @@ const jsonschema = require("jsonschema");
 
 const express = require("express");
 const { BadRequestError } = require("../expressError");
-const { ensureActive, ensureManager } = require("../middleware/auth");
+const { ensureUser, ensureManager } = require("../middleware/auth");
 const Chamber = require("../models/chamber");
 const chamberNewSchema = require("../schemas/chamberNew");
 const chamberSearchSchema = require("../schemas/chamberSearch");
@@ -23,7 +23,7 @@ const router = express.Router({ mergeParams: true });
  * authorization required: active
  */
 
-router.post("/", ensureActive, async function (req, res, next) {
+router.post("/", ensureUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, chamberNewSchema);
     if (!validator.valid) {
@@ -46,7 +46,7 @@ router.post("/", ensureActive, async function (req, res, next) {
  * Authorization required: active
  */
 
-router.get("/", async function (req, res, next) {
+router.get("/", ensureUser, async function (req, res, next) {
   try {
     const chambers = await Chamber.findRelated(req.params);
     return res.json({ chambers });
@@ -55,15 +55,15 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-/**Get /[chamberId] => { chamber}
+/**Get /[id] => { chamber }
  *
- * Returns {id ChamberName, projectId}
- * Where chamber is { projId }
+ * Returns related chamber {id, chamber_name, project_id}
+ * Where chamber is { id }
  *
  * Authorization required: none
  */
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", ensureUser, async function (req, res, next) {
   try {
     const chamber = await Chamber.get(req.params.id);
     return res.json({ chamber });
@@ -94,6 +94,35 @@ router.patch("/:id", ensureManager, async function (req, res, next) {
   }
 });
 
+/** GET/ reading/data
+ *
+ * returns {readingDate, dayNumber}
+ */
+
+router.get(
+  `/:chamberId/reading/data`,
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const chamberData = await Chamber.getReadingData(req.params.chamberId);
+      return res.json({ chamberData });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** POST /reading/new*/
+
+router.post("/reading/new", ensureUser, async function (req, res, next) {
+  try {
+    const chamberReading = await Chamber.newReading(req.body);
+    return res.status(201).json(chamberReading);
+  } catch (err) {
+    return next(err);
+  }
+});
+
 /** DELETE /[id] => { deleted: id }
  *
  * Authorization required: manager
@@ -101,8 +130,8 @@ router.patch("/:id", ensureManager, async function (req, res, next) {
 
 router.delete("/:id", ensureManager, async function (req, res, next) {
   try {
-    await Chamber.remove(req.params.id);
-    return res.json({ deleted: +req.params.id });
+    await Chamber.remove(req.params.chamberId);
+    return res.json({ deleted: req.params.chamberId });
   } catch (err) {
     return next(err);
   }

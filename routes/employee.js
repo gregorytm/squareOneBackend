@@ -11,11 +11,11 @@ const { createToken } = require("../helperFunctions/tokens");
 const employeeNewSchema = require("../schemas/employeeNew.json");
 const employeeUpdateSchema = require("../schemas/employeeUpdate.json");
 const {
-  ensureActive,
   ensureAdmin,
   ensureManager,
-  ensureCorrectEmployeeOrManagement,
+  ensureUser,
 } = require("../middleware/auth");
+const { parseInt } = require("../helperFunctions/numbers");
 
 const router = express.Router();
 
@@ -31,45 +31,53 @@ const router = express.Router();
  * Authorization required: admin
  */
 
-router.post(
-  "/",
-  ensureCorrectEmployeeOrManagement,
-  async function (req, res, next) {
-    try {
-      const validator = jsonschema.validate(req.body, employeeNewSchema);
-      if (!validator.valid) {
-        const errs = validator.errors.map((e) => e.stack);
-        throw new BadRequestError(errs);
-      }
-
-      const employee = await Employee.register(req.body);
-      const token = createToken(employee);
-      return res.status(201).json({ user, token });
-    } catch (err) {
-      return next(err);
+router.post("/", ensureAdmin, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, employeeNewSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
     }
-  }
-);
 
-/**GET /[username] => { employees}
+    const employee = await Employee.register(req.body);
+    const token = createToken(employee);
+    return res.status(201).json({ user, token });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**Get /{employees} => {employee}
+ *
+ * gets a list of all employees for admin
+ *
+ * auth required Admin
+ */
+
+router.get("/personnel", ensureAdmin, async function (req, res, next) {
+  try {
+    const employees = await Employee.getAll();
+    return res.json({ employees });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**GET /[userId] => { employees}
  *
  * Returns { username, username, firstInital, lastName, status}.
  *
  * Authorization required: manager or admin
  */
 
-router.get(
-  "/:username",
-  ensureCorrectEmployeeOrManagement,
-  async function (req, res, next) {
-    try {
-      const employee = await Employee.get(req.params.username);
-      return res.json({ employee });
-    } catch (err) {
-      return next(err);
-    }
+router.get("/:userId", ensureAdmin, async function (req, res, next) {
+  try {
+    const employee = await Employee.get(req.params.userId);
+    return res.json({ employee });
+  } catch (err) {
+    return next(err);
   }
-);
+});
 
 /** PATCH /[username] { employee } => { employee }
  *
@@ -79,7 +87,7 @@ router.get(
  * Returns { username, firstInital}
  */
 
-router.patch("./:username", ensureAdmin, async function (req, res, next) {
+router.patch("/:username", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, employeeUpdateSchema);
     if (!validator.valid) {
@@ -94,15 +102,47 @@ router.patch("./:username", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** DELETE /[username] => { deleted: username }
+/**PATCH /[empId]/manager
+ *
+ * promotes user to manager
  *
  * Authorization required: admin
  */
 
-router.delete("/:username", ensureAdmin, async function (req, res, next) {
+router.patch("/:empId/manager", ensureAdmin, async function (req, res, next) {
   try {
-    await Employee.remove(req.params.username);
-    return res.json({ deleted: req.params.username });
+    const employee = await Employee.promoteToManager(req.params.empId);
+    return res.json({ employee });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**PATCH /[empId]/user
+ *
+ * promotes null to user
+ *
+ * Authorization required: admin
+ */
+
+router.patch("/:empId/user", ensureAdmin, async function (req, res, next) {
+  try {
+    const employee = await Employee.promoteToUser(req.params.empId);
+    return res.json({ employee });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** DELETE /[employeeID] => { deleted: username }
+ *
+ * Authorization required: admin
+ */
+
+router.delete("/:empId", ensureAdmin, async function (req, res, next) {
+  try {
+    await Employee.remove(req.params.empId);
+    return res.json({ deleted: req.params.empId });
   } catch (err) {
     return next(err);
   }
