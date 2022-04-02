@@ -48,7 +48,8 @@ class Project {
       `SELECT id, 
           insured_name, 
           address, 
-          created_at
+          created_at,
+          active
         FROM projects
         WHERE active = $1`,
       [active]

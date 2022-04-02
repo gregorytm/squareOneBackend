@@ -70,7 +70,7 @@ router.get("/personnel", ensureAdmin, async function (req, res, next) {
  * Authorization required: manager or admin
  */
 
-router.get("/:userId", ensureAdmin, async function (req, res, next) {
+router.get("/:userId", async function (req, res, next) {
   try {
     const employee = await Employee.get(req.params.userId);
     return res.json({ employee });
@@ -87,15 +87,16 @@ router.get("/:userId", ensureAdmin, async function (req, res, next) {
  * Returns { username, firstInital}
  */
 
-router.patch("/:username", ensureAdmin, async function (req, res, next) {
+router.patch("/:empId/update", ensureAdmin, async function (req, res, next) {
   try {
+    //TODO: ask about changing schema to use cammal case to
     const validator = jsonschema.validate(req.body, employeeUpdateSchema);
     if (!validator.valid) {
       const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
-    const employee = await Employee.update(req.params.username, req.body);
+    const employee = await Employee.update(req.params.empId, req.body);
     return res.json({ employee });
   } catch (err) {
     return next(err);
@@ -134,7 +135,24 @@ router.patch("/:empId/user", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** DELETE /[employeeID] => { deleted: username }
+/**
+ * PATCH /[empId]/unactive
+ *
+ * set employee as unactive
+ *
+ * authorazion required: admin
+ */
+
+router.patch("/:empId/unactive", ensureAdmin, async function (req, res, next) {
+  try {
+    const employee = await Employee.makeUnactive(req.params.empId);
+    return res.json({ employee });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** DELETE /[empId] => { deleted: username }
  *
  * Authorization required: admin
  */

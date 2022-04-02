@@ -69,7 +69,6 @@ class Dehu {
   }
 
   static async getReadingData(dehuId) {
-    console.log("dehuId", dehuId);
     const result = await db.query(
       `SELECT id, reading_date, day_number
       FROM reading
@@ -77,7 +76,6 @@ class Dehu {
       [dehuId]
     );
     const lastReading = result.rows[result.rows.length - 1];
-    console.log("last reading", lastReading);
     return lastReading;
   }
 

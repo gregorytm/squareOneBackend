@@ -8,13 +8,13 @@
   "examples": [
     {
       "username": "bobbyJo",
-      "first_inital": "B",
-      "last_name": "Jo",
+      "firstInital": "B",
+      "lastName": "Jo",
       "password": "bobbyJo",
       "status": "unactive"
     }
   ],
-  "required": ["username", "first_inital", "last_name", "password", "status"],
+  "required": ["username", "firstInital", "lastName"],
   "properties": {
     "username": {
       "$id": "#/properties/username",
@@ -24,18 +24,18 @@
       "default": "",
       "examples": ["bobbyJo"]
     },
-    "first_inital": {
-      "$id": "#/properties/first_inital",
+    "firstInital": {
+      "$id": "#/properties/firstInital",
       "type": "string",
-      "title": "The first_inital schema",
+      "title": "The firstInital schema",
       "description": "first inital of first name",
       "default": "",
       "examples": ["B"]
     },
-    "last_name": {
-      "$id": "#/properties/last_name",
+    "lastName": {
+      "$id": "#/properties/lastName",
       "type": "string",
-      "title": "The last_name schema",
+      "title": "The lastName schema",
       "description": "last name",
       "default": "",
       "examples": ["Jo"]

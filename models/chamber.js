@@ -1,7 +1,6 @@
 "use strict";
 
 const db = require("../db");
-const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 const { NotFoundError } = require("../expressError");
 
 /** Related functions for chambers */

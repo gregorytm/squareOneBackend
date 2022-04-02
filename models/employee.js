@@ -95,7 +95,6 @@ class Employee {
    */
 
   static async getAll() {
-    console.log("models test1");
     const result = await db.query(
       `SELECT id,
         first_inital AS "firstInital",
@@ -117,7 +116,7 @@ class Employee {
     const employeeRes = await db.query(
       `SELECT id,
         username,
-        first_inital AS "firstName",
+        first_inital AS "firstInital",
         last_name As "lastName",
         role
       FROM employees
@@ -159,6 +158,44 @@ class Employee {
     if (!employee) throw new NotFoundError(`No employee found`);
     return employee;
   }
+
+  static async makeUnactive(empId) {
+    const querySql = await db.query(
+      `UPDATE employees
+    SET role = null 
+    WHERE id = $1
+    RETURNING last_name, role`,
+      [empId]
+    );
+    const employee = querySql.rows;
+
+    if (!employee) throw new NotFoundError(`No employee found`);
+    return employee;
+  }
+
+  /**
+   * Update employe data with `data` sent from client
+   *
+   * Data can include:
+   * { first_inital, last_name }
+   *
+   * returns employee updated data
+   */
+
+  static async update(empId, { firstInital, lastName }) {
+    const querySql = await db.query(
+      `Update employees
+      SET first_inital = $1,
+      last_name=$2
+      WHERE id=$3
+      RETURNING username, first_inital AS firstInital, last_name AS lastName`,
+      [firstInital, lastName, empId]
+    );
+
+    const employee = querySql.rows[0];
+    return employee;
+  }
+
   /**
    * Update user data with `data`.
    *
@@ -177,33 +214,33 @@ class Employee {
    * or serious security ristsk are opened.
    */
 
-  static async update(username, data) {
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-    }
+  // static async update(username, data) {
+  //   if (data.password) {
+  //     data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
+  //   }
 
-    const { setCols, values } = sqlForPartialUpdate(data, {
-      firstInital: "first_inital",
-      lastName: "last_name",
-      role: "role",
-    });
-    const usernameVarIdx = "$" + (values.length + 1);
+  //   const { setCols, values } = sqlForPartialUpdate(data, {
+  //     firstInital: "first_inital",
+  //     lastName: "last_name",
+  //     role: "role",
+  //   });
+  //   const usernameVarIdx = "$" + (values.length + 1);
 
-    const querySql = `UPDATE employees
-                    SET ${setCols}
-                    WHERE username = ${usernameVarIdx}
-                    Returning username,
-                              first_inital As "firstInital",
-                              last_name AS "lastName:,
-                              role`;
-    const result = await db.query(querySql, [...values, username]);
-    const employee = result.rows[0];
+  //   const querySql = `UPDATE employees
+  //                   SET ${setCols}
+  //                   WHERE username = ${usernameVarIdx}
+  //                   Returning username,
+  //                             first_inital As "firstInital",
+  //                             last_name AS "lastName:,
+  //                             role`;
+  //   const result = await db.query(querySql, [...values, username]);
+  //   const employee = result.rows[0];
 
-    if (!employee) throw new NotFoundError(`No user: ${username}`);
+  //   if (!employee) throw new NotFoundError(`No user: ${username}`);
 
-    delete employee.password;
-    return employee;
-  }
+  //   delete employee.password;
+  //   return employee;
+  // }
 
   /** Delete given user from database; returns undefined */
 

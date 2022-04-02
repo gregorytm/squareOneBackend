@@ -283,7 +283,6 @@ router.get("/:projectId/readings/dehu", async function (req, res, next) {
 router.get("/:projectId/readings/materials", async function (req, res, next) {
   try {
     const materials = await Material.getReports(req.params.projectId);
-    console.log("test", materials);
     return res.json({ materials });
   } catch (err) {
     return next(err);
