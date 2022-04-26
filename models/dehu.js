@@ -155,6 +155,24 @@ class Dehu {
 
     if (!dehu) throw new NotFoundError(`No dehumidifier found`);
   }
+
+  /**Delete given material from database; returns undefined
+   *
+   * throws NotFoundError if chamber not found
+   */
+
+  static async remove(dehuId) {
+    const result = await db.query(
+      `DELETE
+      FROM dehumidifier
+      WHERE id=$1
+      RETURNING id`,
+      [dehuId]
+    );
+    const dehu = result.rows[0];
+
+    if (!dehu) throw new NotFoundError("No material found");
+  }
 }
 
 module.exports = Dehu;

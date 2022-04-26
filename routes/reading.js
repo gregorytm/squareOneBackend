@@ -9,7 +9,9 @@ const {
   ensureAdmin,
 } = require("../middleware/auth");
 
-// new reading
+//TODO: delete this entire page?  Reading functionality is on the corrisponding route node, eg: dehus, chambers, materials
+
+// new
 
 router.post("/new", ensureUser, async (req, res, next) => {
   try {

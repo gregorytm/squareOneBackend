@@ -21,7 +21,9 @@
       "title": "The username schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "examples": ["bobbyJo"]
+      "examples": ["bobbyJo"],
+      "minLength": 3,
+      "maxLength": 6
     },
     "first_inital": {
       "$id": "#/properties/first_inital",
@@ -29,7 +31,9 @@
       "title": "The first_inital schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "examples": ["B"]
+      "examples": ["B"],
+      "minLength": 1,
+      "maxLength": 1
     },
     "last_name": {
       "$id": "#/properties/last_name",
@@ -37,7 +41,8 @@
       "title": "The last_name schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "examples": ["Jo"]
+      "examples": ["Jo"],
+      "minLength": 1
     },
     "password": {
       "$id": "#/properties/password",
@@ -45,7 +50,8 @@
       "title": "The password schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "examples": ["bobbyJo"]
+      "examples": ["bobbyJo"],
+      "minLength": 2
     }
   },
   "additionalProperties": true

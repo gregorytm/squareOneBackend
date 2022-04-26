@@ -5,6 +5,8 @@ const db = require("../db");
 const jwt = require("jsonwebtoken");
 const { ensureAdmin } = require("../middleware/auth");
 
+//TODO delete this file
+
 // search of active employees
 router.get("/search", ensureAdmin, async (req, res, next) => {
   try {

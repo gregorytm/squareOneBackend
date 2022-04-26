@@ -7,27 +7,27 @@
   "default": {},
   "examples": [
     {
-      "insured_name": "Example one",
-      "address": "123 fake street"
+      "dehu_number": 3,
+      "location": "master bedroom"
     }
   ],
-  "required": ["insured_name", "address"],
+  "required": ["dehu_number", "location"],
   "properties": {
-    "insured_name": {
-      "$id": "#/properties/insured_name",
-      "type": "string",
-      "title": "The insured_name schema",
+    "dehu_number": {
+      "$id": "#/properties/dehu_number",
+      "type": "integer",
+      "title": "The dehu_number schema",
       "description": "An explanation about the purpose of this instance.",
-      "default": "",
-      "examples": ["Example one"]
+      "default": 0,
+      "examples": [3]
     },
-    "address": {
-      "$id": "#/properties/address",
+    "location": {
+      "$id": "#/properties/location",
       "type": "string",
-      "title": "The address schema",
+      "title": "The location schema",
       "description": "An explanation about the purpose of this instance.",
       "default": "",
-      "examples": ["123 fake street"]
+      "examples": ["master bedroom"]
     }
   },
   "additionalProperties": true

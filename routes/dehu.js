@@ -2,7 +2,10 @@
 
 /** Routes for dehus  */
 const express = require("express");
-const { BadRequrestError } = require("../expressError");
+const jsonschema = require("jsonschema");
+const dehuNewSchema = require("../schemas/dehuNew.json");
+const dehuReadingSchema = require("../schemas/dehuReading.json");
+const { BadRequestError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
 const Dehu = require("../models/dehu.js");
 const router = express.Router({ mergeParams: true });
@@ -11,7 +14,7 @@ const router = express.Router({ mergeParams: true });
 const ExpressError = require("../expressError");
 const db = require("../db");
 
-/** POST { dehu } => { dehu }
+/** POST /new  => { dehu }
  *
  * dehu should be { dehu_number chamber_id, location }
  *
@@ -22,19 +25,24 @@ const db = require("../db");
 
 router.post("/new", ensureUser, async function (req, res, next) {
   try {
+    const validator = jsonschema.validate(req.body, dehuNewSchema);
+    console.log("dehu test", req.body);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
     const dehu = await Dehu.create(req.body);
-    return res.status(201).json(dehu);
+    return res.status(201).json({ dehu });
   } catch (err) {
     return next(err);
   }
 });
 
-/**Get =>
- * {dehu: [{id, dehuNumber, chamberId, location},...] }
+/**GET /[id] => { dehus }
  *
- * all dehu's for a given chamber
+ * all dehu's for a given chamber { dehumidifier.id, dehu_number, chamber_id, location }
  *
- * Authorization required: active
+ * Authorization required: active status
  */
 
 router.get("/:id", ensureUser, async function (req, res, next) {
@@ -46,9 +54,11 @@ router.get("/:id", ensureUser, async function (req, res, next) {
   }
 });
 
-/** GET/ reading/data
+/** GET /[dehuId]/reading/data => { readingData }
  *
- * returns {readingDate, daynumber}
+ * returns last date and time for reading { readingDate, daynumber }
+ *
+ * auth required: active manager
  */
 
 router.get(
@@ -64,21 +74,33 @@ router.get(
   }
 );
 
-/** POST /reading/new/
+/** POST /reading/new/ => { readingData }
  *
+ * requires { chamber_id, dehu_id, material_id, temp, RH, moisture_content,
+ *            reading_date, day_number }
+ *
+ * returns 201 { id, dehu_id, temp, RH, reading_date, day_number }
  * auth required: active, assigned
  */
 
 router.post("/reading/new", ensureUser, async function (req, res, next) {
   try {
-    const chamberReading = await Dehu.newReading(req.body);
-    return res.status(201).json(chamberReading);
+    const validator = jsonschema.validate(req.body, dehuReadingSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+    const dehuReading = await Dehu.newReading(req.body);
+    return res.status(201).json(dehuReading);
   } catch (err) {
     return next(err);
   }
 });
 
-//update dehu
+//TODO: impliment or delete
+/** PATCH /[id] => dehuData
+ * requires
+ */
 router.patch("/:id", ensureManager, async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -93,15 +115,17 @@ router.patch("/:id", ensureManager, async (req, res, next) => {
   }
 });
 
-router.delete("/:id", ensureManager, async (req, res, next) => {
+/** DELETE /[id] => { deleted: id }
+ *
+ * Authorization required: manager
+ */
+
+router.delete("/:dehuId", ensureManager, async function (req, res, next) {
   try {
-    const { id } = req.params;
-    const results = db.query("DELETE FROM dehumidifier WHERE id =$1", [
-      req.params.id,
-    ]);
-    return (res.send = { msg: "DELETED!" });
-  } catch (e) {
-    return next(e);
+    await Dehu.remove(req.params.dehuId);
+    return res.json({ deleted: req.params.dehuId });
+  } catch (err) {
+    return next(err);
   }
 });
 

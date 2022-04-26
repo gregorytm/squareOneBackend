@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { sqlForPartialUpdate } = require("../helperFunctions/sql");
-const { notFoundError } = require("../expressError");
+const { NotFoundError } = require("../expressError");
 
 /** Related functions for materials */
 
@@ -136,6 +136,24 @@ class Material {
     );
     const reading = result.rows[0];
     return reading;
+  }
+
+  /**Delete given material from database; returns undefined
+   *
+   * throws NotFoundError if chamber not found
+   */
+
+  static async remove(materialId) {
+    const result = await db.query(
+      `DELETE
+      FROM affected_material
+      WHERE id=$1
+      RETURNING id`,
+      [materialId]
+    );
+    const material = result.rows[0];
+
+    if (!material) throw new NotFoundError("No material found");
   }
 }
 

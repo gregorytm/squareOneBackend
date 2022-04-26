@@ -89,7 +89,6 @@ router.get("/:userId", async function (req, res, next) {
 
 router.patch("/:empId/update", ensureAdmin, async function (req, res, next) {
   try {
-    //TODO: ask about changing schema to use cammal case to
     const validator = jsonschema.validate(req.body, employeeUpdateSchema);
     if (!validator.valid) {
       const errs = validator.errors.map((e) => e.stack);

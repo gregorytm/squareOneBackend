@@ -20,6 +20,7 @@
       "description": "employees username",
       "default": "",
       "examples": ["bobbyJo"]
+
     },
     "password": {
       "$id": "#/properties/password",

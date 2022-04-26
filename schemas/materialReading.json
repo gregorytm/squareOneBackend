@@ -7,25 +7,24 @@
   "default": {},
   "examples": [
     {
-      "chamber_name": "master bathroom",
-      "project_id": 1
+      "moisture_content": 53,
+      "day_number": 1
     }
   ],
-  "required": ["chamber_name", "project_id"],
+  "required": ["moisture_content", "day_number"],
   "properties": {
-    "chamber_name": {
-      "$id": "#/properties/chamber_name",
-      "type": "string",
-      "title": "The chamber_name schema",
-      "description": "An explanation about the purpose of this instance.",
-      "default": "",
-      "examples": ["master bathroom"],
-      "minLength": 3
-    },
-    "project_id": {
-      "$id": "#/properties/project_id",
+    "moisture_content": {
+      "$id": "#/properties/moisture_content",
       "type": "integer",
-      "title": "The project_id schema",
+      "title": "The moisture_content schema",
+      "description": "An explanation about the purpose of this instance.",
+      "default": 0,
+      "examples": [53]
+    },
+    "day_number": {
+      "$id": "#/properties/day_number",
+      "type": "integer",
+      "title": "The day_number schema",
       "description": "An explanation about the purpose of this instance.",
       "default": 0,
       "examples": [1]
