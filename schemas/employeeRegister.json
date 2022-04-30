@@ -23,7 +23,7 @@
       "default": "",
       "examples": ["bobbyJo"],
       "minLength": 3,
-      "maxLength": 6
+      "maxLength": 30
     },
     "first_inital": {
       "$id": "#/properties/first_inital",
