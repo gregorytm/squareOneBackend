@@ -70,7 +70,7 @@ class Dehu {
 
   static async getReadingData(dehuId) {
     const result = await db.query(
-      `SELECT id, reading_date, day_number
+      `SELECT id, reading_date AS "readingDate", day_number AS "dayNumber"
       FROM reading
       WHERE dehu_id=$1`,
       [dehuId]
