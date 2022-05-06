@@ -26,7 +26,6 @@ const db = require("../db");
 router.post("/new", ensureUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, dehuNewSchema);
-    console.log("dehu test", req.body);
     if (!validator.valid) {
       const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);

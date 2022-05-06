@@ -137,19 +137,6 @@ router.get(
   }
 );
 
-//TODO: wtf is this?
-/**POST /[projId]/chamber/[chamberId]/readings
- *
- * returns
- * 201{  chamber_id, temp, RH, reading_date, day_number }
- * OR
- * 201 { dehumidifier_id, chamber_id, temp, RH, reading_date, day_number }
- * OR
- * 201 {material_id, moisture_content, reading_date, day_number}
- *
- * auth required: acive user
- */
-
 router.post(
   "/:projId/chamber/:chamberId/reading",
   ensureUser,

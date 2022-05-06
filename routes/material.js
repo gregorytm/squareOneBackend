@@ -62,7 +62,6 @@ router.get("/:chamberId", ensureUser, async function (req, res, next) {
 router.post("/reading/new", ensureUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, materialReadingSchema);
-    console.log("test", validator.valid);
     if (!validator.valid) {
       const errs = validator.erros.map((e) => e.stack);
       throw new BadRequestError(errs);
