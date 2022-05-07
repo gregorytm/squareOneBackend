@@ -11,7 +11,7 @@
       "address": "123 fake street"
     }
   ],
-  "required": ["insured_name", "address"],
+  "required": [],
   "properties": {
     "insured_name": {
       "$id": "#/properties/insured_name",
