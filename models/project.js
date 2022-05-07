@@ -147,27 +147,20 @@ class Project {
    * Throws No
    */
 
-  static async update(id, data) {
-    const { setCols, values } = sqlForPartialUpdate(data, {
-      insuredName: "insured_name",
-      createdAt: "created_at",
-    });
-    const handleVarIdx = "$" + (values.length + 1);
+  // static async update(id, data) {
+  //   const {address, insuredName } = data
+  //   if(address && insuredName){
+  //     const querySql = `UPDATE projects
+  //                       SET address = $1, insured_name=$2
+  //                       WHERE id = ${id}
+  //                       RETURNING id,
+  //                                 address
+  //                                 insured_name AS "insuredName"`,[id, address, insuredName];
+  //   }
+  //   if (!project) throw new NotFoundError(`Project not found`);
 
-    const querySql = `UPDATE projects
-                        SET ${setCols}
-                        WHERE id = ${handleVarIdx} 
-                        RETURNING insured_name AS "insuredName",
-                          address,
-                          created_at AS "createdAt",
-                          active`;
-    const result = await db.query(querySql, [...values, id]);
-    const project = result.rows[0];
-
-    if (!project) throw new NotFOundError(`Project not found`);
-
-    return company;
-  }
+  //   return company;
+  // }
 
   /** Delete give project from database; returns undefined/
    *

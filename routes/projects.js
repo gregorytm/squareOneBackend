@@ -162,7 +162,16 @@ router.post(
  */
 
 //TODO: impliment patching of projects & readings
-router.patch("/:id");
+// router.patch("/:id", ensureManager, async function (req, res, next) {
+//   try {
+//     const validator = jsonschema.validate(req.body, projectUpdateSchema);
+//     if(!validator.valid) {
+//       const errs = validator.errosmap(e => e.stack);
+//       throw new BadRequestError(errs);
+//     }
+//     const company = await Project.
+//   }
+// });
 
 /** DELETE /[id] => { deleted: id }
  *
