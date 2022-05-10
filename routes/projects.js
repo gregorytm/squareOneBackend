@@ -73,28 +73,6 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
   }
 });
 
-/**GET /[projId]/chamber/[chamberId]/material/[materialId]
- *
- * returns {  material_id, moisture_content, reading_date, day_number }
- *
- * auth required: active Manager
- */
-
-router.get(
-  "/:projId/chamber/:chamberId/material/:materialId",
-  ensureManager,
-  async function (req, res, next) {
-    try {
-      const material = await Reading.findMaterialReadings(
-        req.params.materialId
-      );
-      return res.json({ material });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
-
 /**GET /[projId]/chamber/[chamberId]/dehu/[dehuId]
  *
  * returns { dehu_id, temp, RH, reading_date, day_number }
