@@ -59,51 +59,6 @@ class Project {
     return projects;
   }
 
-  static async findAll(searchFilters = {}) {
-    let query = `SELECT 
-                  address,
-                  insured_name AS "insuredName",
-                  created_at AS "createdAt",
-                  active,
-                FROM projects`;
-    let whereExpressions = [];
-    let queryValues = [];
-    const { address, insuredName, createdAt, active } = searchFilters;
-
-    //For each possible search tearm add to whereExpressions and queryValues so
-    //we can generate the right SQL
-
-    if (address !== undefined) {
-      queryValues.push(`%{address}%`);
-      whereExpressions.push(`WHERE address IS $${queryValues.length}`);
-    }
-
-    if (insuredName) {
-      queryValues.push(`%${insuredName}%`);
-      whereExpressions.push(`insured_name ILIKE $${insuredName}`);
-    }
-
-    if (createdAt !== undefined) {
-      queryValues.push(createdAt);
-      whereExpressions.push(`WHERE created_at IS $${createdAt}`);
-    }
-
-    if (active !== undefined) {
-      queryValues.push(active);
-      whereExpressions.push(`WHERE active IS $${active}`);
-    }
-
-    if (whereExpressions.length > 0) {
-      query += " WHERE " + whereExpressions.join(" AND ");
-    }
-
-    //finalize query and return results
-
-    query += " ORDER BY insured_name";
-    const projectRes = await DelayNode(query, queryValues);
-    return projectRes.rows;
-  }
-
   /**Given a project id return data about project
    *
    * Returns {id, insuredName, address, createdAt, active}
