@@ -73,26 +73,6 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
   }
 });
 
-/**GET /[projId]/chamber/[chamberId]/dehu/[dehuId]
- *
- * returns { dehu_id, temp, RH, reading_date, day_number }
- *
- * auth required: active Manager
- */
-
-router.get(
-  "/:projId/chamber/:chamberId/dehu/:dehuId",
-  ensureManager,
-  async function (req, res, next) {
-    try {
-      const dehuReadings = Reading.findDehuReadings(req.params.dehuId);
-      return res.json({ dehuReadings });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
-
 /**GET /[projId]/chamber/[chamberId]/readings
  *
  * returns { chamber_id, temp, RH, reading_date, day_number }
