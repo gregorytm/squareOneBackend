@@ -73,28 +73,6 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
   }
 });
 
-/**GET /[projId]/chamber/[chamberId]/readings
- *
- * returns { chamber_id, temp, RH, reading_date, day_number }
- *
- * auth required: acive manager
- */
-
-router.get(
-  "/:projId/chamber/:chamberId/readings",
-  ensureManager,
-  async function (req, res, next) {
-    try {
-      const chamberReadings = await Reading.findChamberReadings(
-        req.params.chamberId
-      );
-      return res.json({ chamberReadings });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
-
 router.post(
   "/:projId/chamber/:chamberId/reading",
   ensureUser,
