@@ -15,7 +15,6 @@ const Reading = require("../models/reading");
 
 const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
-const projectSearchSchema = require("../schemas/projectSearchSchema.json");
 
 const router = new express.Router({ mergeParams: true });
 
