@@ -136,37 +136,6 @@ class Project {
     return transformProject;
   }
 
-  /** Update project data with `data`
-   *  This is a "partial update" -- it's fine if data doesn't contain all the
-   * fields; this only changes provided one
-   *
-   * Data can incude: {insured_name, address, created_at, active}
-   *
-   * Returns {insured_name, address, created_at, active}
-   *
-   * Throws No
-   */
-
-  // static async update(id, data) {
-  //   const {address, insuredName } = data
-  //   if(address && insuredName){
-  //     const querySql = `UPDATE projects
-  //                       SET address = $1, insured_name=$2
-  //                       WHERE id = ${id}
-  //                       RETURNING id,
-  //                                 address
-  //                                 insured_name AS "insuredName"`,[id, address, insuredName];
-  //   }
-  //   if (!project) throw new NotFoundError(`Project not found`);
-
-  //   return company;
-  // }
-
-  /** Delete give project from database; returns undefined/
-   *
-   * Throws NotFoundError if company not found
-   */
-
   static async remove(id) {
     const result = await db.query(
       `DELETE
