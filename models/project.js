@@ -32,15 +32,10 @@ class Project {
     return project;
   }
 
-  /**Find all projects (optional filter on searchFilters)
+  /**Find all active projects
    *
-   * searchFilters(all optional):
-   * - address
-   * -insured_name (will find casae-insensitive, partial matches)
-   * -created_at
-   * -active status
+   * returns {id, insured_name, created_at, active}
    *
-   *  Returns [{ id, insured-name, address, created_at active}, ...],
    */
 
   static async findActive(active = true) {
