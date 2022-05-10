@@ -73,19 +73,6 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
   }
 });
 
-router.post(
-  "/:projId/chamber/:chamberId/reading",
-  ensureUser,
-  async function (req, res, next) {
-    try {
-      const reading = await Reading.create(req.body);
-      return res.status(201).json({ reading });
-    } catch (err) {
-      return next(err);
-    }
-  }
-);
-
 /** Patch /[id] { fld1, fld2, ...} => { project}
  *
  * Patches project data
