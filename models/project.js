@@ -28,7 +28,6 @@ class Project {
       [insuredName, address, createdAt, true]
     );
     const project = result.rows[0];
-
     return project;
   }
 
@@ -50,7 +49,6 @@ class Project {
       [active]
     );
     const projects = result.rows;
-
     return projects;
   }
 
@@ -75,15 +73,7 @@ class Project {
     const project = projectRes.rows[0];
 
     if (!project) throw new NotFoundError(`No project found`);
-
-    const transformProject = {
-      id: project.id,
-      insuredName: project.insuredName,
-      address: project.address,
-      createdAt: new Date(project.createdAt),
-      active: project.active,
-    };
-    return transformProject;
+    return project;
   }
 
   static async remove(id) {
@@ -95,7 +85,6 @@ class Project {
       [id]
     );
     const project = result.rows[0];
-
     if (!project) throw new NotFoundError(`No project found`);
   }
 }
