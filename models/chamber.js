@@ -31,10 +31,9 @@ class Chamber {
    *
    * -Returns [ transformArray ]
    */
-  //TODO: update to use AS
   static async findRelated(projectId) {
     let query = await db.query(
-      `SELECT chamber.id, chamber_name, project_id
+      `SELECT chamber.id AS "id", chamber_name AS "chamberName", project_id AS "projectId"
       FROM chamber
       JOIN projects
       ON chamber.project_id = projects.id
@@ -42,19 +41,7 @@ class Chamber {
       [projectId]
     );
     const allChambers = query.rows;
-
-    const transformArray = [];
-
-    allChambers.map(function (el) {
-      const transformChamber = {
-        id: el.id,
-        chamberName: el.chamber_name,
-        projectId: el.project_id,
-      };
-      transformArray.push(transformChamber);
-    });
-
-    return transformArray;
+    return allChambers;
   }
 
   /** Given a chamber id, return data about chamber
