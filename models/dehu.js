@@ -103,30 +103,22 @@ class Dehu {
    * returns { dehuId, dehuNumber, location temp, RH, readingDate, dayNumber
    * JOINED with readings ON dehuId: reaidng: id, chamber_id, temp, RH, readingDate, dayNumber}
    */
-  //TODO: update this
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT dehu_Number, location, temp, RH, reading_date, day_number
-    FROM dehumidifier
-    JOIN reading 
-    ON dehumidifier.id = reading.dehu_id
-    JOIN chamber 
-    ON chamber.id = dehumidifier.chamber_id
-    JOIN projects
-    ON projects.id = chamber.project_id
-    WHERE projects.id = $1`,
+      `SELECT dehu_Number AS "dehuNumber", location, temp, RH, 
+        reading_date AS "readingDate", day_number
+      FROM dehumidifier
+      JOIN reading 
+      ON dehumidifier.id = reading.dehu_id
+      JOIN chamber 
+      ON chamber.id = dehumidifier.chamber_id
+      JOIN projects
+      ON projects.id = chamber.project_id
+      WHERE projects.id = $1`,
       [projectId]
     );
     const chamberReadings = result.rows;
-    const transformReadings = chamberReadings.map((chamberReadings) => ({
-      dehuNumber: chamberReadings.dehu_number,
-      location: chamberReadings.location,
-      temp: chamberReadings.temp,
-      rh: chamberReadings.rh,
-      readingDate: chamberReadings.reading_date,
-      dayNumber: chamberReadings.day_number,
-    }));
-    return transformReadings;
+    return chamberReadings;
   }
 
   static async remove(id) {
