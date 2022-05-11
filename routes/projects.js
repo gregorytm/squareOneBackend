@@ -11,7 +11,6 @@ const Project = require("../models/project");
 const Chamber = require("../models/chamber");
 const Dehu = require("../models/dehu");
 const Material = require("../models/material");
-const Reading = require("../models/reading");
 
 const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
