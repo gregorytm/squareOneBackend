@@ -34,7 +34,7 @@ class Material {
 
   static async findRelated(chamberId) {
     let query = await db.query(
-      `SELECT affected_material.id, chamber_id, material_name
+      `SELECT affected_material.id AS "id", chamber_id AS "chamberId", material_name AS "materialName"
       FROM affected_material
       JOIN chamber
       ON affected_material.chamber_id = chamber.id
@@ -42,18 +42,7 @@ class Material {
       [chamberId]
     );
     const allMaterials = query.rows;
-
-    const transformArray = [];
-
-    allMaterials.map(function (el) {
-      const transformMaterial = {
-        id: el.id,
-        chamberId: el.chamber_id,
-        materialName: el.material_name,
-      };
-      transformArray.push(transformMaterial);
-    });
-    return transformArray;
+    return allMaterials;
   }
 
   /**FInd last reading data given a materialId
