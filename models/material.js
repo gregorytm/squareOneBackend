@@ -1,7 +1,6 @@
 "use strict";
 
 const db = require("../db");
-const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 const { NotFoundError } = require("../expressError");
 
 /** Related functions for materials */
@@ -17,8 +16,8 @@ class Material {
   static async create({ chamber_id: chamberId, material_name: materialName }) {
     const result = await db.query(
       `INSERT INTO affected_material (chamber_id, material_name)
-    VALUES($1, $2)
-    RETURNING id, chamber_id, material_name`,
+      VALUES($1, $2)
+      RETURNING id, chamber_id, material_name`,
       [chamberId, materialName]
     );
     let material = result.rows[0];
