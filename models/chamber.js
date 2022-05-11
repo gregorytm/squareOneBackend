@@ -16,8 +16,8 @@ class Chamber {
   static async create({ chamber_name: chamberName, project_id: projectId }) {
     const result = await db.query(
       `INSERT INTO chamber (chamber_name, project_id)
-    VALUES ($1, $2)
-    RETURNING id, chamber_name, project_id`,
+      VALUES ($1, $2)
+      RETURNING id, chamber_name, project_id`,
       [chamberName, projectId]
     );
     let chamber = result.rows[0];
@@ -31,7 +31,7 @@ class Chamber {
    *
    * -Returns [ transformArray ]
    */
-
+  //TODO: update to use AS
   static async findRelated(projectId) {
     let query = await db.query(
       `SELECT chamber.id, chamber_name, project_id
@@ -64,7 +64,7 @@ class Chamber {
    * Returns {id, chamberName, projectId}
    *
    */
-
+  //TODO: update to use AS
   static async get(id) {
     const chamberRes = await db.query(
       `SELECT id,
@@ -106,14 +106,14 @@ class Chamber {
    * returns { chamberId, chamberName, projectId,
    * JOINED with readings ON chamberId: reaidng: id, chamber_id, temp, RH, readingDate, dayNumber}
    */
-
+  //TODO: update to use AS
   static async getReports(projectId) {
     const result = await db.query(
       `SELECT chamber_name, temp, RH, reading_date, day_number
-    FROM chamber
-    JOIN reading
-    ON chamber.id =reading.chamber_id
-    WHERE chamber.project_id = $1`,
+        FROM chamber
+        JOIN reading
+        ON chamber.id =reading.chamber_id
+        WHERE chamber.project_id = $1`,
       [projectId]
     );
     const chamberReadings = result.rows;
