@@ -134,9 +134,9 @@ class Employee {
   static async promoteToManager(empId) {
     const querySql = await db.query(
       `UPDATE employees
-    SET role = 'manager' 
-    WHERE id = $1
-    RETURNING last_name, role`,
+      SET role = 'manager' 
+      WHERE id = $1
+      RETURNING last_name, role`,
       [empId]
     );
     const employee = querySql.rows;
