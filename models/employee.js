@@ -25,11 +25,11 @@ class Employee {
     // try to find the user first
     const result = await db.query(
       `SELECT id,
-              username,
-              password,
-              first_inital AS "firstInital",
-              last_name AS "lastName",
-              role
+        username,
+        password,
+        first_inital AS "firstInital",
+        last_name AS "lastName",
+        role
       FROM employees
       WHERE username = $1`,
       [username]
