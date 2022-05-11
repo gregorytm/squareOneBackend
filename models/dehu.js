@@ -121,19 +121,6 @@ class Dehu {
     return chamberReadings;
   }
 
-  static async remove(id) {
-    const result = await db.query(
-      `DELETE
-      from dehumidifier
-      WHERE id = $1
-      RETURNING id`,
-      [id]
-    );
-    const dehu = result.rows[0];
-
-    if (!dehu) throw new NotFoundError(`No dehumidifier found`);
-  }
-
   /**Delete given material from database; returns undefined
    *
    * throws NotFoundError if chamber not found
