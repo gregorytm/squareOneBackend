@@ -84,31 +84,18 @@ class Dehu {
    *
    * returns [ transformArray ]
    */
-  //TODO: update this
   static async findRelated(chamberId) {
     let query = await db.query(
-      `SELECT dehumidifier.id, dehu_number, chamber_id, location
-        FROM dehumidifier 
-        JOIN chamber
-        ON dehumidifier.chamber_id = chamber.id
-        Where chamber_id = $1`,
+      `SELECT dehumidifier.id AS "id", dehu_number AS "dehuNumber", 
+        chamber_id AS "chamberId", location
+      FROM dehumidifier 
+      JOIN chamber
+      ON dehumidifier.chamber_id = chamber.id
+      Where chamber_id = $1`,
       [chamberId]
     );
     const allDehus = query.rows;
-
-    const transformArray = [];
-
-    allDehus.map(function (el) {
-      const transformDehu = {
-        id: el.id,
-        dehuNumber: el.dehu_number,
-        chamberId: el.chamber_id,
-        location: el.location,
-      };
-      transformArray.push(transformDehu);
-    });
-
-    return transformArray;
+    return allDehus;
   }
 
   /**Find all dehus and related readings for a project
