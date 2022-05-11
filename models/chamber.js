@@ -93,25 +93,19 @@ class Chamber {
    * returns { chamberId, chamberName, projectId,
    * JOINED with readings ON chamberId: reaidng: id, chamber_id, temp, RH, readingDate, dayNumber}
    */
-  //TODO: update to use AS
+
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT chamber_name, temp, RH, reading_date, day_number
-        FROM chamber
-        JOIN reading
-        ON chamber.id =reading.chamber_id
-        WHERE chamber.project_id = $1`,
+      `SELECT chamber_name AS "chamberName", temp, RH AS "rh", reading_date AS "readingDate", 
+        day_number AS "dayNumber"
+      FROM chamber
+      JOIN reading
+      ON chamber.id =reading.chamber_id
+      WHERE chamber.project_id = $1`,
       [projectId]
     );
     const chamberReadings = result.rows;
-    const transformReadings = chamberReadings.map((chamberReadings) => ({
-      chamberName: chamberReadings.chamber_name,
-      temp: chamberReadings.temp,
-      rh: chamberReadings.rh,
-      readingDate: chamberReadings.reading_date,
-      dayNumber: chamberReadings.day_number,
-    }));
-    return transformReadings;
+    return chamberReadings;
   }
 
   /**Create new reading  (from data), update db, return new reading data
