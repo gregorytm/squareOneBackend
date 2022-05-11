@@ -63,9 +63,9 @@ class Project {
   static async get(id) {
     const projectRes = await db.query(
       `SELECT id,
-      insured_name,
+        insured_name AS "insuredName",
         address,
-        created_at,
+        created_at AS "createdAt",
         active
       FROM projects
       WHERE id = $1`,
@@ -78,9 +78,9 @@ class Project {
 
     const transformProject = {
       id: project.id,
-      insuredName: project.insured_name,
+      insuredName: project.insuredName,
       address: project.address,
-      createdAt: new Date(project.created_at),
+      createdAt: new Date(project.createdAt),
       active: project.active,
     };
     return transformProject;
