@@ -2,7 +2,6 @@
 
 const db = require("../db");
 const { NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 
 /** Related functions for dehu's */
 
@@ -21,10 +20,10 @@ class Dehu {
   }) {
     const result = await db.query(
       `INSERT INTO dehumidifier(
-          dehu_number,
-          chamber_id,
-          location)
-          VALUES ($1, $2, $3)
+        dehu_number,
+        chamber_id,
+        location)
+        VALUES ($1, $2, $3)
       RETURNING id, dehu_number, chamber_id, location`,
       [dehuNumber, chamberId, location]
     );
@@ -85,14 +84,14 @@ class Dehu {
    *
    * returns [ transformArray ]
    */
-
+  //TODO: update this
   static async findRelated(chamberId) {
     let query = await db.query(
       `SELECT dehumidifier.id, dehu_number, chamber_id, location
-                FROM dehumidifier 
-                JOIN chamber
-                ON dehumidifier.chamber_id = chamber.id
-                Where chamber_id = $1`,
+        FROM dehumidifier 
+        JOIN chamber
+        ON dehumidifier.chamber_id = chamber.id
+        Where chamber_id = $1`,
       [chamberId]
     );
     const allDehus = query.rows;
@@ -117,7 +116,7 @@ class Dehu {
    * returns { dehuId, dehuNumber, location temp, RH, readingDate, dayNumber
    * JOINED with readings ON dehuId: reaidng: id, chamber_id, temp, RH, readingDate, dayNumber}
    */
-
+  //TODO: update this
   static async getReports(projectId) {
     const result = await db.query(
       `SELECT dehu_Number, location, temp, RH, reading_date, day_number
