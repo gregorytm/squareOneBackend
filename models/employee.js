@@ -148,9 +148,9 @@ class Employee {
   static async promoteToUser(empId) {
     const querySql = await db.query(
       `UPDATE employees
-    SET role = 'user' 
-    WHERE id = $1
-    RETURNING last_name, role`,
+      SET role = 'user' 
+      WHERE id = $1
+      RETURNING last_name, role`,
       [empId]
     );
     const employee = querySql.rows;
@@ -162,9 +162,9 @@ class Employee {
   static async makeUnactive(empId) {
     const querySql = await db.query(
       `UPDATE employees
-    SET role = null 
-    WHERE id = $1
-    RETURNING last_name, role`,
+      SET role = null 
+      WHERE id = $1
+      RETURNING last_name, role`,
       [empId]
     );
     const employee = querySql.rows;
@@ -195,52 +195,6 @@ class Employee {
     const employee = querySql.rows[0];
     return employee;
   }
-
-  /**
-   * Update user data with `data`.
-   *
-   * This is a partial update == only one field is required
-   * for update
-   *
-   * Data can include:
-   *  { username, firstInital, lastName, password role }
-   *
-   * Returns { username, firstName, lastName, role }
-   *
-   * Throws NotFoundError if not found.
-   *
-   * WARNING: this function can set a new password or make an employee an admin.
-   * Callers of this function must be certain they ahve validated inputs to this
-   * or serious security ristsk are opened.
-   */
-
-  // static async update(username, data) {
-  //   if (data.password) {
-  //     data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
-  //   }
-
-  //   const { setCols, values } = sqlForPartialUpdate(data, {
-  //     firstInital: "first_inital",
-  //     lastName: "last_name",
-  //     role: "role",
-  //   });
-  //   const usernameVarIdx = "$" + (values.length + 1);
-
-  //   const querySql = `UPDATE employees
-  //                   SET ${setCols}
-  //                   WHERE username = ${usernameVarIdx}
-  //                   Returning username,
-  //                             first_inital As "firstInital",
-  //                             last_name AS "lastName:,
-  //                             role`;
-  //   const result = await db.query(querySql, [...values, username]);
-  //   const employee = result.rows[0];
-
-  //   if (!employee) throw new NotFoundError(`No user: ${username}`);
-
-  //   delete employee.password;
-  //   return employee;
-  // }
 
   /** Delete given user from database; returns undefined */
 
