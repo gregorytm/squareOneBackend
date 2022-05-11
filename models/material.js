@@ -58,7 +58,6 @@ class Material {
       [materialId]
     );
     const lastReading = result.rows[result.rows.length - 1];
-
     return lastReading;
   }
 
@@ -70,26 +69,21 @@ class Material {
 
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT material_name, chamber_name, moisture_content, reading_date, day_number
-    FROM affected_material
-    JOIN reading
-    ON affected_material.id = reading.material_id
-    JOIN chamber
-    ON chamber.id = affected_material.chamber_id
-    JOIN projects
-    ON projects.id = chamber.project_id
-    WHERE projects.id = $1`,
+      `SELECT material_name AS "materialName", chamber_name AS "chamberName", 
+        moisture_content AS "moistureContent", reading_date AS "readingDate", 
+        day_number AS "dayNumber"
+      FROM affected_material
+      JOIN reading
+      ON affected_material.id = reading.material_id
+      JOIN chamber
+      ON chamber.id = affected_material.chamber_id
+      JOIN projects
+      ON projects.id = chamber.project_id
+      WHERE projects.id = $1`,
       [projectId]
     );
     const materialReadings = result.rows;
-    const transformReadings = materialReadings.map((chamberReading) => ({
-      materialName: chamberReading.material_name,
-      chamberName: chamberReading.chamber_name,
-      moistureContent: chamberReading.moisture_content,
-      readingDate: chamberReading.reading_date,
-      dayNumber: chamberReading.day_number,
-    }));
-    return transformReadings;
+    return materialReadings;
   }
 
   /** Create new reading (from data), update DB, return new reading data
