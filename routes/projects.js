@@ -82,17 +82,24 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
  * Authorization required: ensureUser
  */
 
-//TODO: impliment patching of projects & readings
-// router.patch("/:id", ensureManager, async function (req, res, next) {
-//   try {
-//     const validator = jsonschema.validate(req.body, projectUpdateSchema);
-//     if(!validator.valid) {
-//       const errs = validator.errosmap(e => e.stack);
-//       throw new BadRequestError(errs);
-//     }
-//     const company = await Project.
-//   }
-// });
+// TODO: impliment patching of projects & readings
+router.patch(
+  "/projects/:projId/update",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const validator = jsonschema.validate(req.body, projectUpdateSchema);
+      if (!validator.valid) {
+        const errs = validator.erros.map((e) => e.stack);
+        throw new BadRequestError(errs);
+      }
+      const company = await Project.update(req.params, projId, req.body);
+      return res.json({ project });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** DELETE /[id] => { deleted: id }
  *

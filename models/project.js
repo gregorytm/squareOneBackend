@@ -87,6 +87,38 @@ class Project {
     const project = result.rows[0];
     if (!project) throw new NotFoundError(`No project found`);
   }
+
+  static async update(id, data) {
+    if (data.insuredName && data.address) {
+      const result = await db.query(
+        `UPDATE projects
+        SET insured_name = $1, address = $2
+        WHERE id=$4
+        RETURNING id, insured_name AS "insuredName", address`,
+        [data.insuredName, data.address, id]
+      );
+      return result;
+    } else if (data.insuredName && !data.address) {
+      const result = await db.query(
+        `UPDATE projects
+        SET insured_name = $1
+        WHERE id=$2
+        RETURNING id, insured_name AS "insuredName", address`,
+        [data.insuredName, id]
+      );
+      return result;
+    } else if (!data.insuredName && data.address) {
+      const result = await db.query(
+        `UPDATE projects
+        SET address=$1
+        WHERE id=$2
+        RETURNING id, insured_name AS  "insuredName", address`
+      );
+      return result;
+    } else {
+      throw new NotFoundError(`No project found`);
+    }
+  }
 }
 
 module.exports = Project;
