@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helperFunctions/sql");
 
 /**  Related functions for projects */
@@ -89,34 +89,18 @@ class Project {
   }
 
   static async update(id, data) {
-    if (data.insuredName && data.address) {
+    if (data) {
+      console.log("update data", data.insured_name);
       const result = await db.query(
         `UPDATE projects
         SET insured_name = $1, address = $2
-        WHERE id=$4
+        WHERE id=$3
         RETURNING id, insured_name AS "insuredName", address`,
-        [data.insuredName, data.address, id]
-      );
-      return result;
-    } else if (data.insuredName && !data.address) {
-      const result = await db.query(
-        `UPDATE projects
-        SET insured_name = $1
-        WHERE id=$2
-        RETURNING id, insured_name AS "insuredName", address`,
-        [data.insuredName, id]
-      );
-      return result;
-    } else if (!data.insuredName && data.address) {
-      const result = await db.query(
-        `UPDATE projects
-        SET address=$1
-        WHERE id=$2
-        RETURNING id, insured_name AS  "insuredName", address`
+        [data.insured_name, data.address, id]
       );
       return result;
     } else {
-      throw new NotFoundError(`No project found`);
+      throw new BadRequestError(`update data required`);
     }
   }
 }
