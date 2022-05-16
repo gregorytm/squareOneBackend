@@ -10,12 +10,12 @@
       "chamber_name": "master bathroom"
     }
   ],
-  "required": ["chamber_name"],
+  "required": ["chamberName"],
   "properties": {
     "chamber_name": {
-      "$id": "#/properties/chamber_name",
+      "$id": "#/properties/chamberName",
       "type": "string",
-      "title": "The chamber_name schema",
+      "title": "The chamberName schema",
       "description": "chamber name, manager can update",
       "default": "",
       "examples": ["master bathroom"]

@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 
 /** Related functions for chambers */
 
@@ -143,6 +143,21 @@ class Chamber {
     );
     const reading = result.rows[0];
     return reading;
+  }
+
+  static async update(data) {
+    if (data) {
+      const result = await db.query(
+        `UPDATE chamber
+        SET chamber_name = $1
+        WHERE id=$2
+        RETURNING id, chamber_name AS "chamberName", project_id AS "projectId"`,
+        [data.chamberName, data.id]
+      );
+      return result;
+    } else {
+      throw new BadRequestError(`update data required`);
+    }
   }
 
   /**Delete given chamber from database; returns undefined

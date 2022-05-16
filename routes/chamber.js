@@ -73,7 +73,6 @@ router.get("/:chamberId", ensureUser, async function (req, res, next) {
   }
 });
 
-//TODO: impliment or delete
 /** PATCH/ [chamberId] { chamberName}
  *
  * Only chamberName can be changed
@@ -88,8 +87,7 @@ router.patch("/:id", ensureManager, async function (req, res, next) {
       const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
-
-    const chamber = await Chamber.update(req.params.id, req.body);
+    const chamber = await Chamber.update(req.body);
     return res.json({ chamber });
   } catch (err) {
     return next(err);
