@@ -82,7 +82,6 @@ router.get("/:projId", ensureUser, async function (req, res, next) {
  * Authorization required: ensureUser
  */
 
-// TODO: impliment patching of projects & readings
 router.patch("/:id/update", ensureManager, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, projectUpdateSchema);
