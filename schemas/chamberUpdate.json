@@ -7,21 +7,11 @@
   "default": {},
   "examples": [
     {
-      "id": 1,
-      "chamber_name": "master bathroom",
-      "project_id": 1
+      "chamber_name": "master bathroom"
     }
   ],
-  "required": ["id", "chamber_name", "project_id"],
+  "required": ["chamber_name"],
   "properties": {
-    "id": {
-      "$id": "#/properties/id",
-      "type": "integer",
-      "title": "The id schema",
-      "description": "chamber id, should not be changed by anyone",
-      "default": 0,
-      "examples": [1]
-    },
     "chamber_name": {
       "$id": "#/properties/chamber_name",
       "type": "string",
@@ -29,14 +19,6 @@
       "description": "chamber name, manager can update",
       "default": "",
       "examples": ["master bathroom"]
-    },
-    "project_id": {
-      "$id": "#/properties/project_id",
-      "type": "integer",
-      "title": "The project_id schema",
-      "description": "project_id, can not be changed by anyone",
-      "default": 0,
-      "examples": [1]
     }
   },
   "additionalProperties": true
