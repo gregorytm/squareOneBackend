@@ -134,24 +134,6 @@ router.post("/reading/new", ensureUser, async function (req, res, next) {
   }
 });
 
-//TODO: impliment or delete
-/** PATCH /[id] => dehuData
- * requires
- */
-router.patch("/:id", ensureManager, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { dehu_number, chamber_id, location } = req.body;
-    const results = await db.query(
-      "UPDATE projects SET dehu_number=$1, chamer_id=$2, location=$3 WHERE id=$5 RETURNING dehu_number, chamber_id, location",
-      [{ dehu_number, chamber_id, location }]
-    );
-    return res.send(results.rows[0]);
-  } catch (e) {
-    return next(e);
-  }
-});
-
 /** DELETE /[id] => { deleted: id }
  *
  * Authorization required: manager
