@@ -90,7 +90,6 @@ class Project {
 
   static async update(id, data) {
     if (data) {
-      console.log("update data", data.insured_name);
       const result = await db.query(
         `UPDATE projects
         SET insured_name = $1, address = $2
