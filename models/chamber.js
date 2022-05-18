@@ -73,13 +73,15 @@ class Chamber {
 
   static async getReadingData(chamberId) {
     const result = await db.query(
-      `SELECT id, reading_date AS "readingDate", day_number AS "dayNumber"
+      `SELECT id, 
+        reading_date AS "readingDate", 
+        day_number AS "dayNumber"
       FROM reading
-      WHERE chamber_id=$1`,
+      WHERE id=$1`,
       [chamberId]
     );
     const lastReading = result.rows[result.rows.length - 1];
-
+    console.log("last reading", lastReading);
     return lastReading;
   }
 

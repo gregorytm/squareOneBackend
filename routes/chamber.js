@@ -103,7 +103,7 @@ router.patch("/:id", ensureManager, async function (req, res, next) {
 
 router.get(
   `/:chamberId/reading/data`,
-  ensureManager,
+  ensureUser,
   async function (req, res, next) {
     try {
       const chamberData = await Chamber.getReadingData(req.params.chamberId);
