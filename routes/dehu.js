@@ -79,7 +79,7 @@ router.get("/chamber/:id", ensureUser, async function (req, res, next) {
 
 router.get(
   `/:dehuId/reading/data`,
-  ensureManager,
+  ensureUser,
   async function (req, res, next) {
     try {
       const dehuData = await Dehu.getReadingData(req.params.dehuId);
