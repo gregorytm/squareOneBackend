@@ -81,7 +81,6 @@ class Chamber {
       [chamberId]
     );
     const lastReading = result.rows[result.rows.length - 1];
-    console.log("last reading", lastReading);
     return lastReading;
   }
 
