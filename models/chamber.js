@@ -51,24 +51,19 @@ class Chamber {
    * Returns {id, chamberName, projectId}
    *
    */
-  //TODO: update to use AS
   static async get(id) {
     const chamberRes = await db.query(
       `SELECT id,
-        chamber_name,
-        project_id
+        chamber_name AS "chamberName",
+        project_id AS "projectId"
       FROM chamber
       WHERE id = $1`,
       [id]
     );
-    const chambers = chamberRes.rows;
+    const chamber = chamberRes.rows;
 
-    const transformChambers = chambers.map((chamber) => ({
-      id: chamber.id,
-      chamberName: chamber.chamber_name,
-      projectId: chamber.project_id,
-    }));
-    return transformChambers;
+    if (!chamber) throw new NotFoundError("No project found");
+    return chamber;
   }
 
   /** Find last reading data given an chamberId
