@@ -5,6 +5,7 @@ const express = require("express");
 const jsonschema = require("jsonschema");
 const dehuNewSchema = require("../schemas/dehuNew.json");
 const dehuReadingSchema = require("../schemas/dehuReading.json");
+const DehuUpdateSchema = require("../schemas/dehuUpdate.json");
 const { BadRequestError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
 const Dehu = require("../models/dehu.js");
@@ -37,14 +38,30 @@ router.post("/new", ensureUser, async function (req, res, next) {
   }
 });
 
-/**GET /[id] => { dehus }
+/** GET /[id]  => { dehu }
+ *
+ * returns dehu details given an dehuId { dehuNumber, chamberId, location }
+ *
+ * authrization required: active status
+ */
+
+router.get("/:dehuId", ensureUser, async function (req, res, next) {
+  try {
+    const dehu = await Dehu.get(req.params.dehuId);
+    return res.json({ dehu });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**GET /chamber/[id] => { dehus }
  *
  * all dehu's for a given chamber { dehumidifier.id, dehu_number, chamber_id, location }
  *
  * Authorization required: active status
  */
 
-router.get("/:id", ensureUser, async function (req, res, next) {
+router.get("/chamber/:id", ensureUser, async function (req, res, next) {
   try {
     const dehus = await Dehu.findRelated(req.params.id);
     return res.json({ dehus });
@@ -72,6 +89,27 @@ router.get(
     }
   }
 );
+
+/** PATCH/ [chamberId] { chamberName}
+ *
+ * Only chamberName can be changed
+ *
+ * RETURNS { id, chamberName, projectId }
+ */
+
+router.patch("/:id", ensureManager, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, DehuUpdateSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+    const dehu = await Dehu.update(req.body);
+    return res.json({ dehu });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /** POST /reading/new/ => { readingData }
  *

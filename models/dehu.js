@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 
 /** Related functions for dehu's */
 
@@ -29,6 +29,28 @@ class Dehu {
     );
     let dehu = result.rows[0];
 
+    return dehu;
+  }
+
+  /**Given a dehuId, return data about that dehumidifier
+   *
+   * returns { id, dehuNumber, chamberId, location}
+   */
+
+  static async get(dehuId) {
+    const dehuRes = await db.query(
+      `SELECT id,
+        dehu_number AS "dehuNumber",
+        chamber_id AS "chamberId",
+        location
+      FROM dehumidifier
+      WHERE id = $1`,
+      [dehuId]
+    );
+    const dehu = dehuRes.rows[0];
+
+    if (!dehu) throw new NotFoundError(`No dehumidifier found`);
+    return dehu;
     return dehu;
   }
 
@@ -65,6 +87,29 @@ class Dehu {
     );
     const reading = result.rows[0];
     return reading;
+  }
+
+  /**UPDATES a dehu
+   *
+   *  two possible updates, dehuNumber, location,
+   *
+   * updates with old data if unchanged
+   */
+
+  static async update(data) {
+    if (data) {
+      const result = await db.query(
+        `UPDATE dehumidifier
+        SET dehu_number = $1,
+          location = $2
+        WHERE id=$3
+        RETURNING id, dehu_number AS "dehuNumber", chamber_id AS "chamberId", location`,
+        [data.dehuNumber, data.location, data.id]
+      );
+      return result;
+    } else {
+      throw new BadRequestError(`updata data required`);
+    }
   }
 
   static async getReadingData(dehuId) {
