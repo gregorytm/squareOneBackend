@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { NotFoundError } = require("../expressError");
+const { NotFoundError, BadRequestError } = require("../expressError");
 
 /** Related functions for materials */
 
@@ -21,6 +21,28 @@ class Material {
       [chamberId, materialName]
     );
     let material = result.rows[0];
+    return material;
+  }
+
+  /**Given a materialId, return data about that material
+   *
+   * returns { id, chamberId, materialName }
+   *
+   * auth required active user
+   */
+
+  static async get(materialId) {
+    const materialRes = await db.query(
+      `SELECT id,
+        chamber_id AS "chamberId",
+        material_name AS "materialName"
+      FROM affected_material
+      WHERE id=$1`,
+      [materialId]
+    );
+    const material = materialRes.rows[0];
+
+    if (!material) throw new NotFoundError("No material found");
     return material;
   }
 
@@ -90,6 +112,8 @@ class Material {
    * data should be { material_id, moisture_content, reading_date, day_number}
    */
 
+  //TODO: update this
+
   static async newReading({
     chamber_id: chamberId,
     dehu_id: dehuId,
@@ -118,6 +142,28 @@ class Material {
     );
     const reading = result.rows[0];
     return reading;
+  }
+
+  /**UPDATE given affected_material in database
+   *
+   * only materialName can be updated
+   *
+   * returns { id, chamberId, materialName }
+   */
+
+  static async update({ materialName, id }) {
+    if (materialName && id) {
+      const result = await db.query(
+        `UPDATE affected_material
+        SET material_name=$1
+        WHERE id=$2
+        RETURNING id, chamber_id AS "chamberId", material_name AS "materialName"`,
+        [materialName, id]
+      );
+      return result;
+    } else {
+      throw new BadRequestError(`update data required`);
+    }
   }
 
   /**Delete given material from database; returns undefined

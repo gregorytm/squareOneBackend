@@ -5,6 +5,7 @@ const express = require("express");
 const jsonschema = require("jsonschema");
 const materialNewSchema = require("../schemas/materialNew.json");
 const materialReadingSchema = require("../schemas/materialReading.json");
+const materialUpdateSchema = require("../schemas/materialUpdate.json");
 const { BadRequestError } = require("../expressError");
 const Material = require("../models/material");
 const router = express.Router({ mergeParams: true });
@@ -33,14 +34,29 @@ router.post("/new", ensureUser, async function (req, res, next) {
   }
 });
 
-/**GET /[:projId]/chamber/[chamberId]/material
+/**GET information on one material /[materialId
+ *
+ * returns { id, chamberId, materialName}
+ * auth required active status
+ */
+
+router.get("/:materialId", ensureUser, async function (req, res, next) {
+  try {
+    const material = await Material.get(req.params.materialId);
+    return res.json({ material });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/**GET all materials /[:projId]/chamber/[chamberId]/material
  *
  * returns { affected_material.id, chamber_id, material_name }
  *
  * auth required: active status
  */
 
-router.get("/:chamberId", ensureUser, async function (req, res, next) {
+router.get("/:chamberId/list", ensureUser, async function (req, res, next) {
   try {
     const material = await Material.findRelated(req.params.chamberId);
     return res.json({ material });
@@ -73,7 +89,7 @@ router.post("/reading/new", ensureUser, async function (req, res, next) {
   }
 });
 
-/** GET /[materialId]/reading/data
+/** GET material reading date /[materialId]/reading/data
  *
  * returns { id, readingDate, dayNumber }
  *
@@ -100,10 +116,33 @@ router.get(
  * auth required: active status
  */
 
-router.get("/:id", ensureManager, async function (req, res, next) {
+// router.get("/:id", ensureManager, async function (req, res, next) {
+//   try {
+//     const materials = await Material.findRelated(req.params.id);
+//     return res.json({ materials });
+//   } catch (err) {
+//     return next(err);
+//   }
+// });
+
+/** PATCH/ [chamberId] { chamberName }
+ *
+ * Only materialName can be changed
+ *
+ * RETURNS { id, chamber_id, material_name}
+ */
+
+router.patch("/:chamberId", ensureManager, async function (req, res, next) {
   try {
-    const materials = await Material.findRelated(req.params.id);
-    return res.json({ materials });
+    const validator = jsonschema.validate(req.body, materialUpdateSchema);
+    console.log("validator", validator.valid);
+    if (!validator.valid) {
+      console.log("test", validator.errors);
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+    const material = await Material.update(req.body);
+    return res.json({ material });
   } catch (err) {
     return next(err);
   }

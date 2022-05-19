@@ -51,7 +51,6 @@ class Dehu {
 
     if (!dehu) throw new NotFoundError(`No dehumidifier found`);
     return dehu;
-    return dehu;
   }
 
   /** Create new reading (from data), update db, return new reading data
