@@ -135,7 +135,6 @@ router.get(
 router.patch("/:chamberId", ensureManager, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, materialUpdateSchema);
-    console.log("validator", validator.valid);
     if (!validator.valid) {
       console.log("test", validator.errors);
       const errs = validator.errors.map((e) => e.stack);
