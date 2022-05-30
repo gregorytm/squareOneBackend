@@ -34,7 +34,6 @@ class Project {
   /**Find all active projects
    *
    * returns {id, insured_name, created_at, active}
-   *
    */
 
   static async findActive(active = true) {
@@ -49,6 +48,8 @@ class Project {
       [active]
     );
     const projects = result.rows;
+
+    if (!projects) throw new NotFoundError(`No project found`);
     return projects;
   }
 
@@ -56,6 +57,7 @@ class Project {
    *
    * Returns {id, insuredName, address, createdAt, active}
    *
+   * throws UnauthorizedError if no projects found
    */
 
   static async get(id) {
@@ -69,12 +71,18 @@ class Project {
       WHERE id = $1`,
       [id]
     );
-
     const project = projectRes.rows[0];
 
     if (!project) throw new NotFoundError(`No project found`);
     return project;
   }
+
+  /**Given a project id, removes project from the db
+   *
+   * does not return anything
+   *
+   * throws unauthorizedError if no projects found
+   */
 
   static async remove(id) {
     const result = await db.query(
@@ -85,8 +93,16 @@ class Project {
       [id]
     );
     const project = result.rows[0];
+
     if (!project) throw new NotFoundError(`No project found`);
   }
+
+  /**Given a project id and data, updata project details
+   *
+   * data includes insuredName and address
+   *
+   * throws BadRequestError if updata data is left empty or fails
+   */
 
   static async update(id, data) {
     if (data) {
