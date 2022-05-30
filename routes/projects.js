@@ -1,10 +1,7 @@
 "user strict";
 
 /** routes for projects. */
-
-const jsonschema = require("jsonschema");
 const express = require("express");
-
 const { BadRequestError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
 const Project = require("../models/project");
@@ -12,18 +9,51 @@ const Chamber = require("../models/chamber");
 const Dehu = require("../models/dehu");
 const Material = require("../models/material");
 
+const jsonschema = require("jsonschema");
 const projectNewSchema = require("../schemas/projectNewSchema.json");
 const projectUpdateSchema = require("../schemas/projectUpdateSchema.json");
 
 const router = new express.Router({ mergeParams: true });
 
+/** GET {projects} => { projects}
+ *
+ * returns { id, insuredName, address, createdAt, active}
+ *
+ * auth required: active
+ */
+
+router.get("/", ensureUser, async function (req, res, next) {
+  try {
+    const projects = await Project.findActive();
+    return res.json({ projects });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** GET /[projId] => { project }
+ *
+ * returns { insuredName, address, created_at }
+ *
+ * authorization requird: active statis
+ */
+
+router.get("/:projId", ensureUser, async function (req, res, next) {
+  try {
+    const project = await Project.get(req.params.projId);
+    return res.json({ project });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 /** POST /new => { project }
  *
- * project should be { insured_name, address, created_at, active }
+ * requires { insuredName, address, createdAt, active }
  *
- * Returns { id, insured_Name, address, created_at, active }
+ * returns { id, insuredName, address, createdAt, active }
  *
- * Authorization required: active manager
+ * authorization required: active manager
  */
 
 router.post("/new", ensureManager, async function (req, res, next) {
@@ -40,46 +70,13 @@ router.post("/new", ensureManager, async function (req, res, next) {
   }
 });
 
-/** GET {projects} => { projects}
- *
- * returns { id, insured_name, address, created_at, active}
- *
- * auth required: active status
- */
-
-router.get("/", ensureUser, async function (req, res, next) {
-  try {
-    const projects = await Project.findActive();
-    return res.json({ projects });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/** Get /[projId] => { project }
- *
- * Returns { insuredName, address, created_at }
- *
- * authorization requird: active statis
- */
-router.get("/:projId", ensureUser, async function (req, res, next) {
-  try {
-    const project = await Project.get(req.params.projId);
-    return res.json({ project });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/** Patch /[id] { fld1, fld2, ...} => { project}
- *
- * Patches project data
+/** PATCH /[id] { fld1, fld2, ...} => { project}
  *
  * fields can be: [ { insuredName, address, createdAt, active }
  *
- * Feturns { insuredName, address, createdAt, active }
+ * feturns { insuredName, address, createdAt, active }
  *
- * Authorization required: ensureUser
+ * authorization required: ensureUser
  */
 
 router.patch("/:id/update", ensureManager, async function (req, res, next) {
@@ -98,7 +95,7 @@ router.patch("/:id/update", ensureManager, async function (req, res, next) {
 
 /** DELETE /[id] => { deleted: id }
  *
- * Authorization: admin
+ * authorization: admin
  */
 
 router.delete("/:id", ensureManager, async function (req, res, next) {
@@ -110,6 +107,7 @@ router.delete("/:id", ensureManager, async function (req, res, next) {
   }
 });
 
+//TODO: move these routes to a new file
 /** GENERATE REPORTS related to each project( chamber, dehu, affectedMaterial) */
 
 /** GET/=>
