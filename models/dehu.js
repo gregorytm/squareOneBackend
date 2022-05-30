@@ -111,6 +111,11 @@ class Dehu {
     }
   }
 
+  /**Find last reading data for a given materialId
+   *
+   * returns: {id, readingDate, and dayNumber}
+   */
+
   static async getReadingData(dehuId) {
     const result = await db.query(
       `SELECT id, reading_date AS "readingDate", day_number AS "dayNumber"
