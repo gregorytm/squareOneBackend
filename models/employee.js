@@ -58,7 +58,14 @@ class Employee {
    * throws BadRequestError on duplicates.
    */
 
-  static async register({ username, password, first_inital, last_name, role }) {
+  static async register({
+    username,
+    password,
+    first_inital: firstInital,
+    last_name: lastName,
+    role,
+  }) {
+    //check username availability
     const duplicateCheck = await db.query(
       `SELECT username
       FROM employees
@@ -70,6 +77,7 @@ class Employee {
       throw new BadRequestError(`Duplicate username: ${username}`);
     }
 
+    //hashes password using our work factor
     const hashedPassword = await bcrypt.hash(password, BCRYPT_WORK_FACTOR);
 
     const result = await db.query(
@@ -81,7 +89,7 @@ class Employee {
         role)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING username, first_inital AS "firstInital", last_name AS "lastName", role`,
-      [username, hashedPassword, first_inital, last_name, role]
+      [username, hashedPassword, firstInital, lastName, role]
     );
 
     const employee = result.rows[0];
@@ -130,7 +138,10 @@ class Employee {
     return employee;
   }
 
-  /**Given an Id, update role status to go from user to manager */
+  /**Given an Id, update role status to manager
+   *
+   * throws NotFoundError if no employee found
+   */
   static async promoteToManager(empId) {
     const querySql = await db.query(
       `UPDATE employees
@@ -145,6 +156,10 @@ class Employee {
     return employee;
   }
 
+  /**Given an id, update role status to active user
+   *
+   * throws NotFoundError if no employee found
+   */
   static async promoteToUser(empId) {
     const querySql = await db.query(
       `UPDATE employees
@@ -159,6 +174,10 @@ class Employee {
     return employee;
   }
 
+  /**Given an empId, update role status to unactive
+   *
+   * throws NotFoundError if no employee found
+   */
   static async makeUnactive(empId) {
     const querySql = await db.query(
       `UPDATE employees
@@ -176,8 +195,7 @@ class Employee {
   /**
    * Update employe data with `data` sent from client
    *
-   * Data can include:
-   * { first_inital, last_name }
+   * Data includes: { first_inital, last_name }
    *
    * returns employee updated data
    */
@@ -196,7 +214,10 @@ class Employee {
     return employee;
   }
 
-  /** Delete given user from database; returns undefined */
+  /** Delete given user from database; returns undefined
+   *
+   * throws NotFoundError if no emp found
+   */
 
   static async remove(empId) {
     let result = await db.query(
