@@ -1,7 +1,6 @@
 "use strict";
 
-/** Routes for authentication */
-
+/** imports for authentication */
 const jsonschema = require("jsonschema");
 
 const Employee = require("../models/employee");
@@ -11,6 +10,8 @@ const { createToken } = require("../helperFunctions/tokens");
 const employeeAuthSchema = require("../schemas/employeeAuth.json");
 const employeeRegisterSchema = require("../schemas/employeeRegister.json");
 const { BadRequestError } = require("../expressError");
+
+/** routes for authentication */
 
 /**POST /auth/token: { username, password } => { token }
  *
