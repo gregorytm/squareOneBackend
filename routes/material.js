@@ -2,14 +2,16 @@
 
 /** Routes for affected materials */
 const express = require("express");
+const { BadRequestError } = require("../expressError");
+const { ensureUser, ensureManager } = require("../middleware/auth");
+const Material = require("../models/material");
+
 const jsonschema = require("jsonschema");
 const materialNewSchema = require("../schemas/materialNew.json");
 const materialReadingSchema = require("../schemas/materialReading.json");
 const materialUpdateSchema = require("../schemas/materialUpdate.json");
-const { BadRequestError } = require("../expressError");
-const Material = require("../models/material");
+
 const router = express.Router({ mergeParams: true });
-const { ensureUser, ensureManager } = require("../middleware/auth");
 
 /**POST /new => { material }
  *
@@ -17,7 +19,7 @@ const { ensureUser, ensureManager } = require("../middleware/auth");
  *
  * Returns { id, chamber_id, material_name }
  *
- * Authorization required: active status
+ * Authorization required: active
  */
 
 router.post("/new", ensureUser, async function (req, res, next) {
@@ -37,7 +39,8 @@ router.post("/new", ensureUser, async function (req, res, next) {
 /**GET information on one material /[materialId
  *
  * returns { id, chamberId, materialName}
- * auth required active status
+ *
+ * auth required active
  */
 
 router.get("/:materialId", ensureUser, async function (req, res, next) {
@@ -53,7 +56,7 @@ router.get("/:materialId", ensureUser, async function (req, res, next) {
  *
  * returns { affected_material.id, chamber_id, material_name }
  *
- * auth required: active status
+ * auth required: active
  */
 
 router.get("/:chamberId/list", ensureUser, async function (req, res, next) {
@@ -65,35 +68,11 @@ router.get("/:chamberId/list", ensureUser, async function (req, res, next) {
   }
 });
 
-/**POST /reading/new
- *
- * material should be { chamber_id, dehu_id, material_id, temp, RH,
- *                      moisture_content, reading_date, day_number }
- *
- * only values in materi_id, moisture_content, reading_date, day_number
- *
- * auth required: active status
- */
-
-router.post("/reading/new", ensureUser, async function (req, res, next) {
-  try {
-    const validator = jsonschema.validate(req.body, materialReadingSchema);
-    if (!validator.valid) {
-      const errs = validator.erros.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-    const materialReading = await Material.newReading(req.body);
-    return res.status(201).json(materialReading);
-  } catch (err) {
-    return next(err);
-  }
-});
-
 /** GET material reading date /[materialId]/reading/data
  *
  * returns { id, readingDate, dayNumber }
  *
- * auth required: active status
+ * auth required: active
  */
 
 router.get(
@@ -109,21 +88,29 @@ router.get(
   }
 );
 
-/**GET /[id]
+/**POST /reading/new
  *
- * returns {  affected_material.id, chamber_id, material_name }
+ * material should be { chamber_id, dehu_id, material_id, temp, RH,
+ *                      moisture_content, reading_date, day_number }
  *
- * auth required: active status
+ * only values in materi_id, moisture_content, reading_date, day_number
+ *
+ * auth required: active
  */
 
-// router.get("/:id", ensureManager, async function (req, res, next) {
-//   try {
-//     const materials = await Material.findRelated(req.params.id);
-//     return res.json({ materials });
-//   } catch (err) {
-//     return next(err);
-//   }
-// });
+router.post("/reading/new", ensureUser, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, materialReadingSchema);
+    if (!validator.valid) {
+      const errs = validator.erros.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+    const materialReading = await Material.newReading(req.body);
+    return res.status(201).json(materialReading);
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /** PATCH/ [chamberId] { chamberName }
  *
