@@ -1,53 +1,19 @@
 "use strict";
 
 /** Routes for employees */
-
-const jsonschema = require("jsonschema");
-
 const express = require("express");
 const { BadRequestError } = require("../expressError");
+const { ensureAdmin, ensureManager } = require("../middleware/auth");
 const Employee = require("../models/employee");
 const { createToken } = require("../helperFunctions/tokens");
+
+const jsonschema = require("jsonschema");
 const employeeNewSchema = require("../schemas/employeeNew.json");
 const employeeUpdateSchema = require("../schemas/employeeUpdate.json");
-const {
-  ensureAdmin,
-  ensureManager,
-  ensureUser,
-} = require("../middleware/auth");
-const { parseInt } = require("../helperFunctions/numbers");
 
 const router = express.Router();
 
-/** POST / { employee } => { employee, token }
- *
- * Adds a new user.  THis is no the registration endpoint --- instead this is
- * only for admin users to add new users.  The new employee being added can be an
- * admin.
- *
- * This returns the newwly created employee and an authentication token for them:
- *  {employee: { username, firstInital, lastName statis}, token}
- *
- * Authorization required: admin
- */
-
-router.post("/", ensureAdmin, async function (req, res, next) {
-  try {
-    const validator = jsonschema.validate(req.body, employeeNewSchema);
-    if (!validator.valid) {
-      const errs = validator.errors.map((e) => e.stack);
-      throw new BadRequestError(errs);
-    }
-
-    const employee = await Employee.register(req.body);
-    const token = createToken(employee);
-    return res.status(201).json({ user, token });
-  } catch (err) {
-    return next(err);
-  }
-});
-
-/**Get /{employees} => {employee}
+/**GET /{employees} => {employee}
  *
  * gets a list of all employees for admin
  *
@@ -74,6 +40,34 @@ router.get("/:userId", async function (req, res, next) {
   try {
     const employee = await Employee.get(req.params.userId);
     return res.json({ employee });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST / { employee } => { employee, token }
+ *
+ * Adds a new user.  THis is no the registration endpoint --- instead this is
+ * only for admin users to add new users.  The new employee being added can be an
+ * admin.
+ *
+ * This returns the newwly created employee and an authentication token for them:
+ *  {employee: { username, firstInital, lastName statis}, token}
+ *
+ * Authorization required: admin
+ */
+
+router.post("/", ensureAdmin, async function (req, res, next) {
+  try {
+    const validator = jsonschema.validate(req.body, employeeNewSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map((e) => e.stack);
+      throw new BadRequestError(errs);
+    }
+
+    const employee = await Employee.register(req.body);
+    const token = createToken(employee);
+    return res.status(201).json({ user, token });
   } catch (err) {
     return next(err);
   }
