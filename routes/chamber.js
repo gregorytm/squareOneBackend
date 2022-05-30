@@ -3,14 +3,13 @@
 /** Routes for chambers */
 
 const express = require("express");
-const jsonschema = require("jsonschema");
 const { BadRequestError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
 const Chamber = require("../models/chamber");
 
+const jsonschema = require("jsonschema");
 const chamberNewSchema = require("../schemas/chamberNew");
 const chamberReadingSchema = require("../schemas/chamberReading");
-const chamberSearchSchema = require("../schemas/chamberSearch");
 const chamberUpdateSchema = require("../schemas/chamberUpdate");
 
 const router = express.Router({ mergeParams: true });
