@@ -1,7 +1,6 @@
 "use strict";
 
 /** Routes for chambers */
-
 const express = require("express");
 const { BadRequestError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
