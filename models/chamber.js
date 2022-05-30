@@ -46,10 +46,9 @@ class Chamber {
 
   /** Given a chamber id, return data about chamber
    *
-   *
-   *
    * Returns {id, chamberName, projectId}
    *
+   * throws NotFoundError if no project found
    */
   static async get(id) {
     const chamberRes = await db.query(
@@ -68,7 +67,7 @@ class Chamber {
 
   /** Find last reading data given an chamberId
    *
-   * returns
+   * returns: {id, readingDate, dayNumber}
    */
 
   static async getReadingData(chamberId) {
@@ -140,6 +139,12 @@ class Chamber {
     const reading = result.rows[0];
     return reading;
   }
+
+  /**
+   * UPDATE chamber data given a chamber id
+   *
+   * only chamberName can be updated
+   */
 
   static async update(data) {
     if (data) {
