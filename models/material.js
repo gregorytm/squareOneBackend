@@ -112,8 +112,6 @@ class Material {
    * data should be { material_id, moisture_content, reading_date, day_number}
    */
 
-  //TODO: update this
-
   static async newReading({
     chamber_id: chamberId,
     dehu_id: dehuId,
