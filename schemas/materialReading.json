@@ -7,24 +7,24 @@
   "default": {},
   "examples": [
     {
-      "moisture_content": 53,
-      "day_number": 1
+      "moistureContent": 53,
+      "dayNumber": 1
     }
   ],
-  "required": ["moisture_content", "day_number"],
+  "required": ["moistureContent", "dayNumber"],
   "properties": {
-    "moisture_content": {
-      "$id": "#/properties/moisture_content",
+    "moistureContent": {
+      "$id": "#/properties/moistureContent",
       "type": "integer",
-      "title": "The moisture_content schema",
+      "title": "The moistureContent schema",
       "description": "An explanation about the purpose of this instance.",
       "default": 0,
       "examples": [53]
     },
-    "day_number": {
-      "$id": "#/properties/day_number",
+    "dayNumber": {
+      "$id": "#/properties/dayNumber",
       "type": "integer",
-      "title": "The day_number schema",
+      "title": "The dayNumber schema",
       "description": "An explanation about the purpose of this instance.",
       "default": 0,
       "examples": [1]

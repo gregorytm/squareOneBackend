@@ -101,10 +101,12 @@ router.get(
 router.post("/reading/new", ensureUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, materialReadingSchema);
+    console.log("tester", req.body);
     if (!validator.valid) {
       const errs = validator.erros.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
+    console.log("test", req.body);
     const materialReading = await Material.newReading(req.body);
     return res.status(201).json(materialReading);
   } catch (err) {
