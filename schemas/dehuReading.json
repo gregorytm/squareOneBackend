@@ -9,10 +9,10 @@
     {
       "temp": 53,
       "RH": 87,
-      "day_number": 1
+      "dayNumber": 1
     }
   ],
-  "required": ["temp", "RH", "day_number"],
+  "required": ["temp", "RH", "dayNumber"],
   "properties": {
     "temp": {
       "$id": "#/properties/temp",
@@ -31,7 +31,7 @@
       "examples": [87]
     },
     "day_number": {
-      "$id": "#/properties/day_number",
+      "$id": "#/properties/dayNumber",
       "type": "integer",
       "title": "The day_number schema",
       "description": "An explanation about the purpose of this instance.",
