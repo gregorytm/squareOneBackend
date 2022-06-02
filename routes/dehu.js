@@ -98,6 +98,7 @@ router.post("/new", ensureUser, async function (req, res, next) {
  */
 
 router.post("/reading/new", ensureUser, async function (req, res, next) {
+  console.log("test", req.body);
   try {
     const validator = jsonschema.validate(req.body, dehuReadingSchema);
     if (!validator.valid) {

@@ -59,20 +59,20 @@ class Dehu {
    */
 
   static async newReading({
-    chamber_id: chamberId,
-    dehu_id: dehuId,
-    material_id: materialId,
+    chamberId,
+    dehuId,
+    materialId,
     temp,
     RH,
-    moisture_content: moistureContent,
-    reading_date: readingDate,
-    day_number: dayNumber,
+    moistureContent,
+    readingDate,
+    dayNumber,
   }) {
     const result = await db.query(
       `INSERT INTO reading
       (chamber_id, dehu_id, material_id, temp, RH, moisture_content, reading_date, day_number)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING id, dehu_id, temp, RH, reading_date, day_number`,
+      RETURNING id, dehu_id AS "dehuId", temp, reading_date AS "readingDate", day_number AS "dayNumber"`,
       [
         chamberId,
         dehuId,
