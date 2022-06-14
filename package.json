@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "git push gregorytm.dev:repos/squareOneBackend"
+    "deploy": "git push gregorytm.dev:repos/squareOneBackend"
   },
   "keywords": [],
   "author": "",
