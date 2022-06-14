@@ -19,6 +19,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.json({ hello: "world" });
+});
+
 app.use("/auth", authRoutes);
 app.use("/employee", employeeRoutes);
 app.use("/projects", projectRoutes);
