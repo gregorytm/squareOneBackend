@@ -23,6 +23,7 @@ const router = express.Router();
 router.get("/personnel", ensureAdmin, async function (req, res, next) {
   try {
     const employees = await Employee.getAll();
+    console.log("test", employees);
     return res.json({ employees });
   } catch (err) {
     return next(err);

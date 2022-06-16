@@ -108,7 +108,9 @@ class Employee {
         first_inital AS "firstInital",
         last_name AS "lastName",
         role
-      FROM employees`
+      FROM employees
+      WHERE role <> 'admin'
+      OR role is NULL`
     );
     return result.rows;
   }
