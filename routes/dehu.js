@@ -65,6 +65,28 @@ router.get(
   }
 );
 
+/** GET /reading/:reportId
+ *
+ * requires { reportId }
+ *
+ * returns {id, dehuId, temp, rh, readingDate, dayNumber}
+ */
+
+router.get(
+  `/reading/:reportId`,
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const dehuReportDetails = await Dehu.getReportDetails(
+        req.params.reportId
+      );
+      return res.json({ dehuReportDetails });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 /** POST /new  => { dehu }
  *
  * requires { dehuNumber chamberId, location }
@@ -131,6 +153,26 @@ router.patch("/:id", ensureManager, async function (req, res, next) {
     return next(err);
   }
 });
+
+/** DELETE /reeading/[reportId]
+ *
+ * returns { deleted: id}
+ *
+ * Authorization required: manager
+ */
+
+router.delete(
+  "/reading/:reportId",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      await Dehu.removeReadingEntry(req.params.reportId);
+      return res.json({ deleted: req.params.reportId });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** DELETE /[id] => { deleted: id }
  *

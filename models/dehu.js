@@ -152,10 +152,11 @@ class Dehu {
    * returns { dehuId, dehuNumber, location temp, RH, readingDate, dayNumber
    * JOINED with readings ON dehuId: reaidng: id, chamber_id, temp, RH, readingDate, dayNumber}
    */
+
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT dehu_Number AS "dehuNumber", location, temp, RH, 
-        reading_date AS "readingDate", day_number
+      `SELECT reading.id, dehu_Number AS "dehuNumber", location, temp, RH, 
+        reading_date AS "readingDate", day_number AS "dayNumber"
       FROM dehumidifier
       JOIN reading 
       ON dehumidifier.id = reading.dehu_id
@@ -170,9 +171,43 @@ class Dehu {
     return chamberReadings;
   }
 
+  /**Find one dehu report given a reportId for reports
+   *
+   * returns {id, dehuId, temp, rh, readingDate, dayNumber}
+   */
+
+  static async getReportDetails(reportId) {
+    let result = await db.query(
+      `SELECT id, dehu_id AS "dehuId", temp, rh, reading_date AS "readingDate", day_number AS "dayNumber"
+      FROM reading
+      WHERE id = $1`,
+      [reportId]
+    );
+    const reportDetails = result.rows;
+    return reportDetails;
+  }
+
+  /** delete a report given a reportId from the database
+   *
+   * throws NotFoundError if report is not found
+   */
+
+  static async removeReadingEntry(reportId) {
+    const result = await db.query(
+      `DELETE
+      FROM reading
+      WHERE id=$1
+      RETURNING id`,
+      [reportId]
+    );
+    const dehuReport = result.rows[0];
+
+    if (!dehuReport) throw new NotFoundError("No reeading found");
+  }
+
   /**Delete given material from database; returns undefined
    *
-   * throws NotFoundError if chamber not found
+   * throws NotFoundError if dehu not found
    */
 
   static async remove(dehuId) {
