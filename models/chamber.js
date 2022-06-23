@@ -91,7 +91,7 @@ class Chamber {
 
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT chamber_name AS "chamberName", temp, RH AS "rh", reading_date AS "readingDate", 
+      `SELECT reading.id, chamber_name AS "chamberName", temp, RH AS "rh", reading_date AS "readingDate", 
         day_number AS "dayNumber"
       FROM chamber
       JOIN reading
@@ -159,6 +159,40 @@ class Chamber {
     } else {
       throw new BadRequestError(`update data required`);
     }
+  }
+
+  /**Find one dehu reading given a readingId for readings
+   *
+   * returns { id, chamberId, temp, rh, readingDate, dayNumber}
+   */
+
+  static async getReadingDetails(readingId) {
+    let result = await db.query(
+      `SELECT id, chamber_id AS "chamberId", temp, rh, reading_date AS "readingDate", day_number AS "dayNumber"
+      FROM reading
+      WHERE id = $1`,
+      [readingId]
+    );
+    const readingDetails = result.rows;
+    return readingDetails;
+  }
+
+  /**delete a reading given a readingId from the database
+   *
+   * throw NotFoundError if reading is not found
+   */
+
+  static async removeReadingEntry(readingId) {
+    const result = await db.query(
+      `DELETE
+    FROM reading
+    WHERE id=$1
+    RETURNING id`,
+      [readingId]
+    );
+    const chamberReading = result.rows[0];
+
+    if (!chamberReading) throw new NotFoundError("No reading found");
   }
 
   /**Delete given chamber from database; returns undefined

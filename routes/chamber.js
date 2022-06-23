@@ -2,7 +2,7 @@
 
 /** Routes for chambers */
 const express = require("express");
-const { BadRequestError } = require("../expressError");
+const { BadRequestError, NotFoundError } = require("../expressError");
 const { ensureUser, ensureManager } = require("../middleware/auth");
 const Chamber = require("../models/chamber");
 
@@ -131,6 +131,48 @@ router.get("/project/:projId/", ensureUser, async function (req, res, next) {
     return next(err);
   }
 });
+
+/** GET /reading/[readingid]
+ *
+ * Returns { id, chamberId, chamberName, temp, rh, readingDate, dayNumber }
+ *
+ * auth required: manager
+ */
+
+router.get(
+  `/reading/:readingId`,
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const chamberReadingDetails = await Chamber.getReadingDetails(
+        req.params.readingId
+      );
+      return res.json({ chamberReadingDetails });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** DELETE /reading/[readingId]
+ *
+ * returns { deleted: id}
+ *
+ * Authorization required: manager
+ */
+
+router.delete(
+  "/reading/:readingId",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      await Chamber.removeReadingEntry(req.params.readingId);
+      return res.json({ deleted: req.params.readingId });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 /** DELETE /[id] => { deleted: id }
  *
