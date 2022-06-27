@@ -90,7 +90,7 @@ class Material {
 
   static async getReports(projectId) {
     const result = await db.query(
-      `SELECT material_name AS "materialName", chamber_name AS "chamberName", 
+      `SELECT reading.id, material_name AS "materialName", chamber_name AS "chamberName", 
         moisture_content AS "moistureContent", reading_date AS "readingDate", 
         day_number AS "dayNumber"
       FROM affected_material
@@ -162,6 +162,41 @@ class Material {
     } else {
       throw new BadRequestError(`update data required`);
     }
+  }
+
+  /** GET one material reading given a readingId for reading
+   *
+   * returns { id, materialId, moistureContent,  reading,Date, dayNumber }
+   */
+
+  static async getReadingDetails(readingId) {
+    let result = await db.query(
+      `SELECT id, material_id AS "materialId", moisture_content AS "moistureContent", 
+        reading_date AS "readingDate", day_number AS "dayNumber"
+      FROM reading
+      WHERE id = $1`,
+      [readingId]
+    );
+    const readingDetails = result.rows;
+    return readingDetails;
+  }
+
+  /** DELETE a reading given a reading Id from the database
+   *
+   * throw NotFoundERror if readinag is not found
+   */
+
+  static async removeReadingEntry(readingId) {
+    const result = await db.query(
+      `DELETE
+      FROM reading
+      WHERE id=$1
+      RETURNING id`,
+      [readingId]
+    );
+    const materialReading = result.rows[0];
+
+    if (!materialReading) throw new NotFoundError("No reading found");
   }
 
   /**Delete given material from database; returns undefined

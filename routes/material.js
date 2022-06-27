@@ -112,6 +112,48 @@ router.post("/reading/new", ensureUser, async function (req, res, next) {
   }
 });
 
+/**GET /reading/[readingId]
+ *
+ * Returns { id, materialId, moistureContent, readingDate, dayNumber}
+ *
+ * auth required: manager
+ */
+
+router.get(
+  `/reading/:readingId`,
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      const materialReadingDetails = await Material.getReadingDetails(
+        req.params.readingId
+      );
+      return res.json({ materialReadingDetails });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
+/** DELETE /reading/[readingId]
+ *
+ * returns {deleted: id}
+ *
+ * Authorization required: manager
+ */
+
+router.delete(
+  "/reading/:readingId",
+  ensureManager,
+  async function (req, res, next) {
+    try {
+      await Material.removeReadingEntry(req.params.readingId);
+      return res.json({ deleted: req.params.readingId });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
+
 /** PATCH/ [chamberId] { chamberName }
  *
  * Only materialName can be changed
