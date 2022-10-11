@@ -37,6 +37,7 @@ router.get("/personnel", ensureAdmin, async function (req, res, next) {
  */
 
 router.get("/:userId", async function (req, res, next) {
+  console.log("test test");
   try {
     const employee = await Employee.get(req.params.userId);
     return res.json({ employee });
